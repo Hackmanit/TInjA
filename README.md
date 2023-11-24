@@ -119,11 +119,11 @@ go install -v github.com/Hackmanit/TInjA@latest
 ```
 
 ### Specify Headers, Cookies, and POST Body
-- `-H` specifies headers which shall be added to the request.
+- `--header`/`-H` specifies headers which shall be added to the request.
     - Example: `tinja url -u "http://example.com/" -H "Authentication: Bearer ey..."`
-- `-c` specifies cookies which shall be added to the request.
+- `--cookie`/`-c` specifies cookies which shall be added to the request.
     - Example: `tinja url -u "http://example.com/" -c "PHPSESSID=ABC123..."`
-- `-d` specifies the POST body which shall be added to the request.
+- `--data`/`-d` specifies the POST body which shall be added to the request.
     - Example: `tinja url -u "http://example.com/" -d "username=Kirlia&password=notguessable"`
 
 ### Scan CSTI in Addition to SSTI
