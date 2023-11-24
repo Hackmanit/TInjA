@@ -1,94 +1,111 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-# TInjA - the Template INJection Analyzer
+# TInjA – the Template INJection Analyzer
 
 TInjA is a CLI tool for testing web pages for **template injection** vulnerabilities.
+
+It supports **44 of the most relevant template engines** (as of September 2023) for eight different programming languages.
+
+TInjA was developed by [Hackmanit](https://hackmanit.de) and Maximilian Hildebrand.
 
 - [Features](#features)
 - [Supported Template Engines](#supported-template-engines)
 - [Installation](#installation)
+    - [Option 1: Prebuilt Binary](#option-1-prebuilt-binary)
+    - [Option 2: Install Using Go](#option-2-install-using-go)
 - [Usage](#usage)
+    - [Specify Headers, Cookies, and POST Body](#specify-headers-cookies-and-post-body)
+    - [Scan CSTI in Addition to SSTI](#scan-csti-in-addition-to-ssti)
+    - [Generate a JSONL Report](#generate-a-jsonl-report)
+    - [Use a Proxy](#use-a-proxy)
+    - [Set a Ratelimit](#set-a-ratelimit)
 - [Troubleshooting](#troubleshooting)
+- [TODOs](#todos)
+- [Background Information](#background-information)
+- [License](#license)
 
 ## Features
-- Template injection detection and template engine identification
-    - 44 template engines supported (see [Supported Template Engines](#supported-template-engines))
-    - Both **SSTI** and **CSTI** are detected
+- Automatic detection of template injection possibilities and identification of the template engine in use.
+    - 44 of the most relevant template engines supported (see [Supported Template Engines](#supported-template-engines)).
+    - Both **SSTI** and **CSTI** vulnerabilities are detected.
         - SSTI = server-side template injection
         - CSTI = client-side template injection
-- Efficient through the usage of polyglots
-    - On average 5 polyglots are sent until the injection is detected and the engine identified
-- Pass crawled URLs to TInjA in JSONL format
-- Set custom headers, cookies, POST parameters, query parameters
-- Route the traffic through a proxy (e. g. Burp Suite)
-- Ratelimiting
+- Efficient scanning thanks to the usage of polyglots:
+    - On average only five polyglots are sent to the web page until the template injection possibility is detected and the template engine identified.
+- Pass crawled URLs to TInjA in JSONL format.
+- Set custom headers, cookies, POST parameters, and query parameters.
+- Route the traffic through a proxy (e.g., Burp Suite).
+- Configure Ratelimiting.
 
 ## Supported Template Engines
-### Javascript
-- Handlebars
-- EJS
-- Underscore
-- Vue.js
-- Mustache
-- Pug
-- Angular.js
-- Hogan.js
-- Nunjucks
-- Dot
-- Velocity.js
-- Eta
-- Twig.js
-### Python
-- Jinja2
-- Tornado
-- Mako
-- Django
-- SimpleTemplate Engine
-- Pystache
-- Cheetah3
-- Chameleon
+### .NET
+- DotLiquid
+- Fluid
+- Razor Engine
+- Scriban
+### Elixir
+- EEx
+### Go
+- html/template
+- text/template
 ### Java
-- Groovy
 - Freemarker
-- Velocity
+- Groovy
 - Thymeleaf
+- Velocity
+### JavaScript
+- Angular.js
+- Dot
+- EJS
+- Eta
+- Handlebars
+- Hogan.js
+- Mustache
+- Nunjucks
+- Pug
+- Twig.js
+- Underscore
+- Velocity.js
+- Vue.js
 ### PHP
 - Blade
-- Twig
+- Latte
 - Mustache.php
 - Smarty
-- Latte
+- Twig
+### Python
+- Chameleon
+- Cheetah3
+- Django
+- Jinja2
+- Mako
+- Pystache
+- SimpleTemplate Engine
+- Tornado
 ### Ruby
 - ERB
 - Erubi
 - Erubis
 - Haml
 - Liquid
-- Slim
 - Mustache
-### Dotnet
-- Razor Engine
-- DotLiquid
-- Scriban
-- Fluid
-### Golang
-- html/template
-- text/template
-### Elixir
-- EEx
+- Slim
+
 ## Installation
-### Option 1: Pre-built Binary
-Prebuilt binaries of TInjA are provided on the releases page.
+### Option 1: Prebuilt Binary
+Prebuilt binaries of TInjA are provided on the [releases page](https://github.com/Hackmanit/TInjA/releases).
 ### Option 2: Install Using Go
-go1.18 or higher is required.
+Requirements: go1.18 or higher
 ```bash
-go install -v github.com/Hackmanit/Web-Cache-Vulnerability-Scanner@latest
+go install -v github.com/Hackmanit/TInjA@latest
 ```
+
 ## Usage
-```tinja url -u "http://example.com/"``` scan a single URL  
-```tinja url -u "http://example.com/" -u "http://example.com/path2``` scan multiple URLs  
-```tinja url -u "file:/path/to/file"``` scan by importing URLs from a file  
-```tinja jsonl -j "/path/to/file"``` scan by importing URLs and additional information from a JSONL file. The file must contain a JSON object with the following structure on each line:
+- Scan a single URL: `tinja url -u "http://example.com/"`
+- Scan multiple URLs: `tinja url -u "http://example.com/" -u "http://example.com/path2"`
+- Scan URLs provided in a file: `tinja url -u "file:/path/to/file"`
+- Scan URLs with additional information provided in a JSONL file: `tinja jsonl -j "/path/to/file"`
+    - Each line of the JSONL file must contain a single JSON object. The whole JSON object must be in one line. Each object must have the following structure *(extra line breaks and indentation are for display purposes only)*:
 ```json
 {
 "request":{
@@ -101,35 +118,64 @@ go install -v github.com/Hackmanit/Web-Cache-Vulnerability-Scanner@latest
 }
 ```
 
-### Specify Headers, Cookies and POST Body
-```
-tinja url -u "http://example.com/" -H "Authentication: Bearer ej..."
-tinja url -u "http://example.com/" -c "PHPSESSID=ABC123..."
-tinja url -u "http://example.com/" -d "username=Kirlia&password=notguessable"
-```
+### Specify Headers, Cookies, and POST Body
+- `-H` specifies headers which shall be added to the request.
+    - Example: `tinja url -u "http://example.com/" -H "Authentication: Bearer ey..."`
+- `-c` specifies cookies which shall be added to the request.
+    - Example: `tinja url -u "http://example.com/" -c "PHPSESSID=ABC123..."`
+- `-d` specifies the POST body which shall be added to the request.
+    - Example: `tinja url -u "http://example.com/" -d "username=Kirlia&password=notguessable"`
 
-### Scan CSTI, too
-By default TInjA only scans for SSTI. In order to also scan for CSTI a headless browser needs to be utilized, which may increase RAM and CPU usage.
-```tinja url -u "http://example.com/" --csti```
+### Scan CSTI in Addition to SSTI
+- `--csti` enables the scanning for CSTI.
+    - Example: `tinja url -u "http://example.com/" --csti`
+
+By default TInjA only scans for SSTI. A headless browser is utilized for scanning for CSTI, which may increase RAM and CPU usage.
+
 ### Generate a JSONL Report
-A JSONL report is generated and updated after each scanned URL if the flag --reportpath is set.   
-```tinja url -u "http://example.com/" --reportpath "/home/user/Documents"```
+- `--reportpath` enables generating a report in JSONL format. The report will be updated after each scanned URL and will be stored at the provided path.
+    - Example: `tinja url -u "http://example.com/" --reportpath "/home/user/Documents"`
+
 ### Use a Proxy
-To scan HTTPS URLs using a proxy, a CA certificate of the proxy in PEM format is needed. Burp Suite certificates are provided in DER format, for example. To convert them, the following command can be used: openssl x509 -inform DER -outform PEM -text -in cacert.der -out cacert.pem.  
-```tinja url -u "http://example.com/" --proxyurl "http://127.0.0.1:8080"``` scan HTTP URLs using a proxy  
-```tinja url -u "http://example.com/" --proxyurl "http://127.0.0.1:8080" --proxycertpath "/home/user/Documents/cacert.pem"``` scan both HTTP and HTTPS URLs using a proxy  
+- `--proxyurl` specifies the URL and port of a proxy to be used for scanning.
+    - Example: `tinja url -u "http://example.com/" --proxyurl "http://127.0.0.1:8080"`
+- `--proxycertpath` specifies the CA certificate of the proxy in PEM format (needed when scanning HTTPS URLs).
+    - Example `tinja url -u "http://example.com/" --proxyurl "http://127.0.0.1:8080" --proxycertpath "/home/user/Documents/cacert.pem"`
+
+To scan HTTPS URLs using a proxy a CA certificate of the proxy in PEM format is needed. Burp Suite CA certificates are provided in DER format, for example. To convert them, the following command can be used:
+
+`openssl x509 -inform DER -outform PEM -text -in cacert.der -out cacert.pem`
+
 ### Set a Ratelimit
-The number of maximum allowed requests per second can be set with --ratelimit/-r. By default, this number is unrestricted.  
-```tinja url -u "http://example.com/" --ratelimit 10```
+- `--ratelimit`/`-r` specifies the number of maximum requests per second allowed. By default, this number is unrestricted.
+    - Example: `tinja url -u "http://example.com/" --ratelimit 10`
 
 ## Troubleshooting
-`[ERR] Couldn't connect to URL: remote error: tls: user canceled`: When using a proxy and connecting via https, the proxy's certificate (.pem) needs to be specified with --proxycertpath
+- `[ERR] Couldn't connect to URL: remote error: tls: user canceled`
+    - When using a proxy and connecting via HTTPS, the proxy's CA certificate (.pem) needs to be specified with `--proxycertpath` (see [Use a Proxy](#use-a-proxy)).
+- `[ERR] Error reading response from target server via proxy: malformed HTTP response "HTTP/1.1"`
+    - Disable `Default to HTTP/2 if the server supports it` in Burp Suite's settings (`Network` > `HTTP`).
 
-`[ERR] Error reading response from target server via proxy: malformed HTTP response "HTTP/1.1"`: Disable "Default to HTTP/2 if the server supports it" in Burp's Settings under Network > HTTP
+## TODOs
+- `TINJA` marker to mark where the polyglots shall be placed.
+- Support for multipart bodies.
+- Optional: Blind SSTI Payloads (e.g., sleep payloads).
+- Feedback, whether CSTI or SSTI was detected.
+- Check headless browser's console for template engine error messages (see https://github.com/go-rod/rod/issues/330).
 
-## TODO
-- "TINJA" marker to mark where the polyglots shall be placed
-- support for multipart bodies
-- optional: Blind SSTI Payloads (e.g. sleep payloads)
-- feedback, whether CSTI or SSTI was detected
-- check headless browser's console for template engine error messages https://github.com/go-rod/rod/issues/330
+## Background Information
+A blog post providing more information about template injection and [TInjA – the Template INJection Analyzer](https://github.com/Hackmanit/TInjA) can be found here:
+
+[Soon to be released](https://www.hackmanit.de/en/blog-en/)
+
+The Template Injection Playground was developed as a part of a master's thesis by Maximilian Hildebrand.
+You can find results of the master's thesis publicly available here:
+- [Template Injection Table](https://github.com/Hackmanit/template-injection-table)
+- [Playground](https://github.com/Hackmanit/template-injection-playground)
+- [TInjA – the Template INJection Analyzer](https://github.com/Hackmanit/TInjA)
+- [Master's Thesis (PDF)](https://www.hackmanit.de/images/download/thesis/Improving-the-Detection-and-Identification-of-Template-Engines-for-Large-Scale-Template-Injection-Scanning-Maximilian-Hildebrand-Master-Thesis-Hackmanit.pdf)
+
+## License
+TInjA – the Template INJection Analyzer was developed by [Hackmanit](https://hackmanit.de) and Maximilian Hildebrand as a part of his master's thesis. TInjA – the Template INJection Analyzer is licensed under the [Apache License, Version 2.0](license.txt).
+
+<a href="https://hackmanit.de"><img src="https://www.hackmanit.de/templates/hackmanit-v2/img/wbm_hackmanit.png" width="30%"></a>
