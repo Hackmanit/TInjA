@@ -171,7 +171,7 @@ A blog post providing more information about template injection and [TInjA – t
 The Template Injection Playground was developed as a part of a master's thesis by Maximilian Hildebrand.
 You can find results of the master's thesis publicly available here:
 - [Template Injection Table](https://github.com/Hackmanit/template-injection-table)
-- [Playground](https://github.com/Hackmanit/template-injection-playground)
+- [Template Injection Playground](https://github.com/Hackmanit/template-injection-playground)
 - [TInjA – the Template INJection Analyzer](https://github.com/Hackmanit/TInjA)
 - [Master's Thesis (PDF)](https://www.hackmanit.de/images/download/thesis/Improving-the-Detection-and-Identification-of-Template-Engines-for-Large-Scale-Template-Injection-Scanning-Maximilian-Hildebrand-Master-Thesis-Hackmanit.pdf)
 
