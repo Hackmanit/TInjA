@@ -6,7 +6,7 @@ TInjA is a CLI tool for testing web pages for **template injection** vulnerabili
 
 It supports **44 of the most relevant template engines** (as of September 2023) for eight different programming languages.
 
-TInjA was developed by [Hackmanit](https://hackmanit.de) and Maximilian Hildebrand.
+TInjA was developed by [Hackmanit](https://hackmanit.de) and [Maximilian Hildebrand](https://www.github.com/m10x).
 
 - [Features](#features)
 - [Supported Template Engines](#supported-template-engines)
@@ -176,6 +176,6 @@ You can find results of the master's thesis publicly available here:
 - [Master's Thesis (PDF)](https://www.hackmanit.de/images/download/thesis/Improving-the-Detection-and-Identification-of-Template-Engines-for-Large-Scale-Template-Injection-Scanning-Maximilian-Hildebrand-Master-Thesis-Hackmanit.pdf)
 
 ## License
-TInjA – the Template INJection Analyzer was developed by [Hackmanit](https://hackmanit.de) and Maximilian Hildebrand as a part of his master's thesis. TInjA – the Template INJection Analyzer is licensed under the [Apache License, Version 2.0](license.txt).
+TInjA – the Template INJection Analyzer was developed by [Hackmanit](https://hackmanit.de) and [Maximilian Hildebrand](https://www.github.com/m10x) as a part of his master's thesis. TInjA – the Template INJection Analyzer is licensed under the [Apache License, Version 2.0](license.txt).
 
 <a href="https://hackmanit.de"><img src="https://www.hackmanit.de/templates/hackmanit-v2/img/wbm_hackmanit.png" width="30%"></a>
