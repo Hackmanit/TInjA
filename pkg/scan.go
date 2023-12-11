@@ -24,7 +24,6 @@ import (
 	"example/user/tinja/pkg/structs"
 	"fmt"
 	"math"
-	"math/rand"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httputil"
@@ -80,12 +79,10 @@ func Scan(configParam structs.Config, version string, typ int) {
 	start := time.Now()
 	// Shall a report be created?
 	boolReport = config.ReportPath != ""
-	// Making the random generator really random
-	rand.Seed(time.Now().UnixNano())
 
 	/**** Fill Report *****/
 	if boolReport {
-		report.Name = "Template_Injection_Scanner"
+		report.Name = "TInjA"
 		report.Version = version
 
 		report.Config = &config
@@ -129,7 +126,7 @@ func Scan(configParam structs.Config, version string, typ int) {
 			u = config.Crawls[i].Request.Endpoint
 			crawl = config.Crawls[i]
 		case URL:
-			u = config.URLs[i]
+			u = strings.TrimSpace(config.URLs[i])
 			crawl = structs.Crawl{}
 		default:
 			Print("Scan: Unknown typ: "+strconv.Itoa(typ), Red)
