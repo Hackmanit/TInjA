@@ -82,6 +82,8 @@ func init() {
 			nonerr1: respUnmodified, nonerr2: "1@*#{1}", nonerr3: respUnmodified,
 			nonerrRuby: "1#{2}{{a}}", nonerrDotnet: respUnmodified, nonerrJava: respUnmodified, nonerrPHP: respUnmodified, nonerrPython: respUnmodified, nonerrJavascript: "//*<!--{##1{{!--{{1}}--}}-->*/#}", nonerrGolang: respUnmodified, nonerrElixir: "<%a%>", nonerrIdent1: respUnmodified, nonerrIdent2: "${\"\"}", nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "<%= 7*7 %>",
+		VerifyError:     "<%= * %>",
 	})
 	// Haml
 	engines = append(engines, structs.Engine{
@@ -94,6 +96,8 @@ func init() {
 			nonerr1: respUnmodified, nonerr2: "<%=1%>@*1", nonerr3: respUnmodified,
 			nonerrRuby: "<%=1%>2{{a}}", nonerrDotnet: respUnmodified, nonerrJava: respUnmodified, nonerrPHP: respUnmodified, nonerrPython: respError, nonerrJavascript: "<!-- /*<!--{##<%=1%>{{!--{{1}}--}}-->*/#} -->", nonerrGolang: respUnmodified, nonerrElixir: respUnmodified, nonerrIdent1: respUnmodified, nonerrIdent2: respUnmodified, nonerrIdent3: respError,
 		},
+		VerifyReflected: "= 7*7",
+		VerifyError:     "=*",
 	})
 	// Liquid
 	engines = append(engines, structs.Engine{
@@ -106,6 +110,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: "{##}/**/",
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "{#$1#}}", nonerrJavascript: "//*<!--{##<%=1%>--}}-->*/#}", nonerrGolang: respEmpty, nonerrElixir: respUnmodified, nonerrIdent1: respEmpty, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7 | times:7 }}",
+		VerifyError:     "{{",
 	})
 	// Slim
 	engines = append(engines, structs.Engine{
@@ -118,6 +124,8 @@ func init() {
 			nonerr1: respUnmodified, nonerr2: "<%=1%>@*1", nonerr3: respUnmodified,
 			nonerrRuby: "<%=1%>2{{a}}", nonerrDotnet: respUnmodified, nonerrJava: respUnmodified, nonerrPHP: respUnmodified, nonerrPython: respUnmodified, nonerrJavascript: respUnmodified, nonerrGolang: respUnmodified, nonerrElixir: respUnmodified, nonerrIdent1: respUnmodified, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "#{ 7*7 }",
+		VerifyError:     "#{#}",
 	})
 	// Mustache
 	engines = append(engines, structs.Engine{
@@ -130,6 +138,8 @@ func init() {
 			nonerr1: "p \">[[$]]", nonerr2: respUnmodified, nonerr3: "{##}/*#&lt;Mustache:0xARBITRARY16ARBITRARY&gt;*/",
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "@*", nonerrJava: respUnmodified, nonerrPHP: "}", nonerrPython: "{#$#}}", nonerrJavascript: "//*<!--{##<%=1%>--}}-->*/#}", nonerrGolang: "#&lt;Mustache:0xARBITRARY16ARBITRARY&gt;", nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "SH{{#foo}}NO{{/foo}}OW",
+		VerifyError:     "{{#",
 	})
 	/* End Ruby */
 
@@ -145,6 +155,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: "&lt;%=1%>@*#{1}", nonerr3: "{##}/*ARBITRARY*/",
 			nonerrRuby: respError, nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "{#$1#}}", nonerrJavascript: respError, nonerrGolang: "ARBITRARY", nonerrElixir: "&lt;%%a%>", nonerrIdent1: respError, nonerrIdent2: "${\"&lt;%-1-%>\"}", nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{printf \"%[1]s%[3]s\"  \"SH\" \"NO\" \"OW\"}}",
+		VerifyError:     "{{pri",
 	})
 	// text/template
 	engines = append(engines, structs.Engine{
@@ -157,6 +169,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: "{##}/*ARBITRARY*/",
 			nonerrRuby: respError, nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "{#$1#}}", nonerrJavascript: respError, nonerrGolang: "ARBITRARY", nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{printf \"%[1]s%[3]s\"  \"SH\" \"NO\" \"OW\"}}",
+		VerifyError:     "{{pri",
 	})
 	/* End Golang */
 
@@ -172,6 +186,8 @@ func init() {
 			nonerr1: respUnmodified, nonerr2: "<%=1%>", nonerr3: respUnmodified,
 			nonerrRuby: respUnmodified, nonerrDotnet: "{{1}}", nonerrJava: respUnmodified, nonerrPHP: respUnmodified, nonerrPython: respUnmodified, nonerrJavascript: respUnmodified, nonerrGolang: respUnmodified, nonerrElixir: respUnmodified, nonerrIdent1: respUnmodified, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "@(7*7)",
+		VerifyError:     "@(",
 	})
 	// DotLiquid
 	engines = append(engines, structs.Engine{
@@ -183,6 +199,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: "{##}/**/",
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "{#$1#}}", nonerrJavascript: "//*<!--{##<%=1%>-}}-->*/#}", nonerrGolang: respEmpty, nonerrElixir: respUnmodified, nonerrIdent1: respEmpty, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7 | times:7 }}",
+		VerifyError:     "{{",
 	})
 	// Scriban
 	engines = append(engines, structs.Engine{
@@ -195,6 +213,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: respError,
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "{#$1#}}", nonerrJavascript: respError, nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7*7 }}",
+		VerifyError:     "{{{",
 	})
 	// Scriban Liquid
 	engines = append(engines, structs.Engine{
@@ -206,6 +226,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: respError,
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "{#$1#}}", nonerrJavascript: respError, nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7 | times:7 }}",
+		VerifyError:     "{{{",
 	})
 	// Fluid
 	engines = append(engines, structs.Engine{
@@ -218,6 +240,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: respError,
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "{#$1#}}", nonerrJavascript: respError, nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: respEmpty, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7 | times:7 }}",
+		VerifyError:     "{{",
 	})
 	/* End Dotnet
 
@@ -232,6 +256,8 @@ func init() {
 			nonerr1: respUnmodified, nonerr2: "1@*#{1}", nonerr3: respUnmodified,
 			nonerrRuby: "1#{2}{{a}}", nonerrDotnet: respUnmodified, nonerrJava: respUnmodified, nonerrPHP: respUnmodified, nonerrPython: respUnmodified, nonerrJavascript: "//*<!--{##1{{!--{{1}}--}}-->*/#}", nonerrGolang: respUnmodified, nonerrElixir: "<%a%>", nonerrIdent1: respUnmodified, nonerrIdent2: respError, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "<%= 7*7 %>",
+		VerifyError:     "<%= * %>",
 	})
 	/* End Elixir */
 
@@ -247,6 +273,8 @@ func init() {
 			nonerr1: "p \">[[1]]", nonerr2: "1@*#{1}", nonerr3: respUnmodified,
 			nonerrRuby: "1#{2}{{a}}", nonerrDotnet: respUnmodified, nonerrJava: "a\">##[[1]]", nonerrPHP: respUnmodified, nonerrPython: "{#1#}}", nonerrJavascript: "//*<!--{##1{{!--{{1}}--}}-->*/#}", nonerrGolang: respUnmodified, nonerrElixir: respError, nonerrIdent1: respUnmodified, nonerrIdent2: "<%-1-%>", nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "${7*7}",
+		VerifyError:     "${*}",
 	})
 	// Freemarker
 	engines = append(engines, structs.Engine{
@@ -259,6 +287,8 @@ func init() {
 			nonerr1: respError, nonerr2: "<%=1%>@*1", nonerr3: respUnmodified,
 			nonerrRuby: "<%=1%>2{{a}}", nonerrDotnet: respUnmodified, nonerrJava: "a\">##[[1]]", nonerrPHP: respUnmodified, nonerrPython: respError, nonerrJavascript: respUnmodified, nonerrGolang: respUnmodified, nonerrElixir: respUnmodified, nonerrIdent1: respUnmodified, nonerrIdent2: "<%-1-%>", nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "${7*7}",
+		VerifyError:     "${*}",
 	})
 	// Velocity
 	engines = append(engines, structs.Engine{
@@ -271,6 +301,8 @@ func init() {
 			nonerr1: respUnmodified, nonerr2: respUnmodified, nonerr3: "{",
 			nonerrRuby: respUnmodified, nonerrDotnet: respUnmodified, nonerrJava: "a\">", nonerrPHP: respUnmodified, nonerrPython: respUnmodified, nonerrJavascript: "//*<!--{", nonerrGolang: respUnmodified, nonerrElixir: respUnmodified, nonerrIdent1: respUnmodified, nonerrIdent2: respUnmodified, nonerrIdent3: "a",
 		},
+		VerifyReflected: "#set( $foo = 7*7) $foo",
+		VerifyError:     "#set( a",
 	})
 	// Thymeleaf
 	engines = append(engines, structs.Engine{
@@ -282,6 +314,8 @@ func init() {
 			nonerr1: "p \">1", nonerr2: respUnmodified, nonerr3: respUnmodified,
 			nonerrRuby: respUnmodified, nonerrDotnet: respUnmodified, nonerrJava: "a\">##1", nonerrPHP: respUnmodified, nonerrPython: respUnmodified, nonerrJavascript: respUnmodified, nonerrGolang: respUnmodified, nonerrElixir: respUnmodified, nonerrIdent1: respUnmodified, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "[[${ 7*7 }]]",
+		VerifyError:     "[[${ * }]]",
 	})
 	// Thymeleaf Inline
 	engines = append(engines, structs.Engine{
@@ -294,6 +328,8 @@ func init() {
 			nonerr1: "p", nonerr2: respError, nonerr3: respError,
 			nonerrRuby: respError, nonerrDotnet: respError, nonerrJava: "a", nonerrPHP: respError, nonerrPython: respError, nonerrJavascript: respError, nonerrGolang: respError, nonerrElixir: respError, nonerrIdent1: respError, nonerrIdent2: respError, nonerrIdent3: respError,
 		},
+		VerifyReflected: "${ 7*7 }",
+		VerifyError:     "${ * }",
 	})
 	/* End Java */
 
@@ -309,6 +345,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: respError,
 			nonerrRuby: respError, nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "{#$1#}}", nonerrJavascript: respError, nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7*7 }}",
+		VerifyError:     "{{ * }}",
 	})
 	// Twig
 	engines = append(engines, structs.Engine{
@@ -321,6 +359,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: respError,
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "}", nonerrJavascript: "//*<!--", nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: "1", nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7*7 }}",
+		VerifyError:     "{{ * }}",
 	})
 	// Twig Sandbox
 	engines = append(engines, structs.Engine{
@@ -333,6 +373,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: respError,
 			nonerrRuby: respError, nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "}", nonerrJavascript: "//*<!--", nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "SH{% if 1 == 2 %}NO{% endif %}OW",
+		VerifyError:     "{% if 1 == 2 %}",
 	})
 	// Mustache PHP
 	engines = append(engines, structs.Engine{
@@ -345,6 +387,8 @@ func init() {
 			nonerr1: "p \">[[$]]", nonerr2: respUnmodified, nonerr3: "{##}/**/",
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "@*", nonerrJava: respUnmodified, nonerrPHP: "}", nonerrPython: "{#$#}}", nonerrJavascript: "//*<!--{##<%=1%>--}}-->*/#}", nonerrGolang: respEmpty, nonerrElixir: respUnmodified, nonerrIdent1: respEmpty, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "SH{{#foo}}NO{{/foo}}OW",
+		VerifyError:     "{{#",
 	})
 	// Smarty/Smarty (Security)
 	engines = append(engines, structs.Engine{
@@ -357,6 +401,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: "<%=1%>@*#1", nonerr3: respError,
 			nonerrRuby: respError, nonerrDotnet: "1@*", nonerrJava: "a\">##[[$1]]", nonerrPHP: "7}", nonerrPython: respError, nonerrJavascript: respError, nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: "$<%-1-%>", nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{math equation=\"7 * 7\"}",
+		VerifyError:     "{math equation=\" * \"}",
 	})
 	// Latte/Latte (Sandbox)
 	engines = append(engines, structs.Engine{
@@ -369,6 +415,8 @@ func init() {
 			nonerr1: "p \">[[${1}]]", nonerr2: "<%=1%>@*#1", nonerr3: respError,
 			nonerrRuby: respError, nonerrDotnet: "{1}@*", nonerrJava: "a\">##[[$1]]", nonerrPHP: "{7}}", nonerrPython: respError, nonerrJavascript: respError, nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: "{1}", nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{= 7*7 }",
+		VerifyError:     "{= * }",
 	})
 	/* End PHP */
 
@@ -384,6 +432,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: respError,
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "}", nonerrJavascript: "//*<!--", nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: "True", nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7*7 }}",
+		VerifyError:     "{{ * }}",
 	})
 	// Tornado
 	engines = append(engines, structs.Engine{
@@ -396,6 +446,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: respError,
 			nonerrRuby: respError, nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "}", nonerrJavascript: "//*<!--", nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: "True", nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7*7 }}",
+		VerifyError:     "{{ * }}",
 	})
 	// Mako
 	engines = append(engines, structs.Engine{
@@ -408,6 +460,8 @@ func init() {
 			nonerr1: "p \">[[{1}]]", nonerr2: respError, nonerr3: respUnmodified,
 			nonerrRuby: respError, nonerrDotnet: respUnmodified, nonerrJava: "a\">##[[1]]", nonerrPHP: respUnmodified, nonerrPython: "{#{1}#}}", nonerrJavascript: respError, nonerrGolang: respUnmodified, nonerrElixir: respError, nonerrIdent1: respUnmodified, nonerrIdent2: "<%-1-%>", nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "${7*7}",
+		VerifyError:     "${*}",
 	})
 	// Django
 	engines = append(engines, structs.Engine{
@@ -420,6 +474,8 @@ func init() {
 			nonerr1: respError, nonerr2: respUnmodified, nonerr3: "/**/",
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: respError, nonerrJava: respUnmodified, nonerrPHP: respError, nonerrPython: "}", nonerrJavascript: "//*<!--", nonerrGolang: respEmpty, nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{% widthratio 7 1 7 %}",
+		VerifyError:     "{% widthratio %}",
 	})
 	// SimpleTemplateEngine
 	engines = append(engines, structs.Engine{
@@ -432,6 +488,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: respError,
 			nonerrRuby: respError, nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "{#$1#}}", nonerrJavascript: respError, nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: "True", nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{7*7}}",
+		VerifyError:     "{{*}}",
 	})
 	// Pystache
 	engines = append(engines, structs.Engine{
@@ -444,6 +502,8 @@ func init() {
 			nonerr1: "p \">[[$]]", nonerr2: respUnmodified, nonerr3: "{##}/**/",
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "@*", nonerrJava: respUnmodified, nonerrPHP: "}", nonerrPython: "{#$#}}", nonerrJavascript: "//*<!--{##<%=1%>--}}-->*/#}", nonerrGolang: respEmpty, nonerrElixir: respUnmodified, nonerrIdent1: respEmpty, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "SH{{#foo}}NO{{/foo}}OW",
+		VerifyError:     "{{/foo}}",
 	})
 	// Cheetah3
 	engines = append(engines, structs.Engine{
@@ -456,6 +516,8 @@ func init() {
 			nonerr1: "p \">[[{1}]]", nonerr2: "1@*#{1}", nonerr3: "{",
 			nonerrRuby: "1#{2}{{a}}", nonerrDotnet: respUnmodified, nonerrJava: "a\">", nonerrPHP: respUnmodified, nonerrPython: "{#{1}#}}", nonerrJavascript: "//*<!--{", nonerrGolang: respUnmodified, nonerrElixir: respError, nonerrIdent1: respUnmodified, nonerrIdent2: "<%-1-%>", nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "${7*7}",
+		VerifyError:     "${*}",
 	})
 	// Chameleon
 	engines = append(engines, structs.Engine{
@@ -468,6 +530,8 @@ func init() {
 			nonerr1: "p \">[[{1}]]", nonerr2: respUnmodified, nonerr3: respUnmodified,
 			nonerrRuby: respUnmodified, nonerrDotnet: respUnmodified, nonerrJava: "a\">##[[1]]", nonerrPHP: respUnmodified, nonerrPython: "{#{1}#}}", nonerrJavascript: respError, nonerrGolang: respUnmodified, nonerrElixir: respUnmodified, nonerrIdent1: respUnmodified, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "${7*7}",
+		VerifyError:     "${*}",
 	})
 	/* End Python */
 
@@ -483,6 +547,8 @@ func init() {
 			nonerr1: "p \">[[$]]", nonerr2: respUnmodified, nonerr3: "{##}/**/",
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "@*", nonerrJava: respUnmodified, nonerrPHP: respError, nonerrPython: "{#$#}}", nonerrJavascript: "//*<!--{##<%=1%>-->*/#}", nonerrGolang: respEmpty, nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "SH{{#foo}}NO{{/foo}}OW",
+		VerifyError:     "{{/foo}}",
 	})
 	// EJS
 	engines = append(engines, structs.Engine{
@@ -495,6 +561,8 @@ func init() {
 			nonerr1: respUnmodified, nonerr2: "1@*#{1}", nonerr3: respUnmodified,
 			nonerrRuby: "1#{2}{{a}}", nonerrDotnet: respUnmodified, nonerrJava: respUnmodified, nonerrPHP: respUnmodified, nonerrPython: respUnmodified, nonerrJavascript: "//*<!--{##1{{!--{{1}}--}}-->*/#}", nonerrGolang: respUnmodified, nonerrElixir: "<%a%>", nonerrIdent1: respUnmodified, nonerrIdent2: "${\"1\"}", nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "<%= 7*7 %>",
+		VerifyError:     "<%= * %>",
 	})
 	// Underscore
 	engines = append(engines, structs.Engine{
@@ -507,6 +575,8 @@ func init() {
 			nonerr1: respUnmodified, nonerr2: "1@*#{1}", nonerr3: respUnmodified,
 			nonerrRuby: "1#{2}{{a}}", nonerrDotnet: respUnmodified, nonerrJava: respUnmodified, nonerrPHP: respUnmodified, nonerrPython: respUnmodified, nonerrJavascript: "//*<!--{##1{{!--{{1}}--}}-->*/#}", nonerrGolang: respUnmodified, nonerrElixir: respError, nonerrIdent1: respUnmodified, nonerrIdent2: respError, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "<%= 7*7 %>",
+		VerifyError:     "<%= * %>",
 	})
 	// VueJS
 	engines = append(engines, structs.Engine{
@@ -519,6 +589,8 @@ func init() {
 			nonerr1: "p &quot;&gt;[[$1]]", nonerr2: "&lt;%=1%&gt;@*#{1}", nonerr3: respError,
 			nonerrRuby: "&lt;%=1%&gt;#{2}", nonerrDotnet: "1@*", nonerrJava: "a&quot;&gt;##[[${1}]]", nonerrPHP: "7}", nonerrPython: "{#$1#}}", nonerrJavascript: "<!--[-->//*<!--{##<%=1%>{{!--{{1}}--}}-->*/#}<!--]-->", nonerrGolang: respError, nonerrElixir: "&lt;%%a%&gt;", nonerrIdent1: respError, nonerrIdent2: "${&quot;&lt;%-1-%&gt;&quot;}", nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7*7 }}",
+		VerifyError:     "{{ * }}",
 	})
 	// MustacheJS
 	engines = append(engines, structs.Engine{
@@ -531,6 +603,8 @@ func init() {
 			nonerr1: respError, nonerr2: respUnmodified, nonerr3: "{##}/**/",
 			nonerrRuby: respError, nonerrDotnet: respError, nonerrJava: respUnmodified, nonerrPHP: respError, nonerrPython: respError, nonerrJavascript: "//*<!--{##<%=1%>--}}-->*/#}", nonerrGolang: respEmpty, nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "SH{{=N O=}}OW",
+		VerifyError:     "{{SH OW}}",
 	})
 	// Pug
 	engines = append(engines, structs.Engine{
@@ -543,6 +617,8 @@ func init() {
 			nonerr1: "<p>\">[[${{1}}]]</p>", nonerr2: "<%=1%>@*1", nonerr3: respError,
 			nonerrRuby: "<%=1%>2{{a}}", nonerrDotnet: respError, nonerrJava: respError, nonerrPHP: respError, nonerrPython: respError, nonerrJavascript: "<!--*<!--{##<%=1%>{{!--{{1}}--}}-->*/#}-->", nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respError, nonerrIdent3: "<div id=\"evaluate\" a=\"a\"></div>",
 		},
+		VerifyReflected: "#{7*7}",
+		VerifyError:     "#{*}",
 	})
 	// Pug (Inline)
 	engines = append(engines, structs.Engine{
@@ -555,6 +631,8 @@ func init() {
 			nonerr1: respUnmodified, nonerr2: "<%=1%>@*1", nonerr3: respUnmodified,
 			nonerrRuby: "<%=1%>2{{a}}", nonerrDotnet: respUnmodified, nonerrJava: respError, nonerrPHP: respUnmodified, nonerrPython: respUnmodified, nonerrJavascript: respUnmodified, nonerrGolang: respUnmodified, nonerrElixir: respUnmodified, nonerrIdent1: respUnmodified, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "#{7*7}",
+		VerifyError:     "#{*}",
 	})
 	// AngularJS
 	engines = append(engines, structs.Engine{
@@ -567,6 +645,8 @@ func init() {
 			nonerr1: "class=\"ng-binding\">p \"&gt;[[$1]]", nonerr2: "&lt;%=1%&gt;@*#{1}", nonerr3: respError,
 			nonerrRuby: "class=\"ng-binding\">&lt;%=1%&gt;#{2}", nonerrDotnet: "1@*", nonerrJava: "a\"&gt;##[[${1}]]", nonerrPHP: "7}", nonerrPython: "{#$1#}}", nonerrJavascript: respUnmodified, nonerrGolang: respUnmodified, nonerrElixir: "&lt;%%a%&gt;", nonerrIdent1: respError, nonerrIdent2: "${\"&lt;%-1-%&gt;\"}", nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{7*7}}",
+		VerifyError:     "{{ * }}",
 	})
 	// HoganJS
 	engines = append(engines, structs.Engine{
@@ -579,6 +659,8 @@ func init() {
 			nonerr1: "p \">[[$]]", nonerr2: respUnmodified, nonerr3: "{##}/**/",
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "@*", nonerrJava: respUnmodified, nonerrPHP: "}", nonerrPython: "{#$#}}", nonerrJavascript: "//*<!--{##<%=1%>--}}-->*/#}", nonerrGolang: respEmpty, nonerrElixir: respUnmodified, nonerrIdent1: respEmpty, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "SH{{#foo}}NO{{/foo}}OW",
+		VerifyError:     "{{/foo}}",
 	})
 	// Nunjucks
 	engines = append(engines, structs.Engine{
@@ -591,6 +673,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: respError,
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "}", nonerrJavascript: "//*<!--", nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: respEmpty, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7*7 }}",
+		VerifyError:     "{{ * }}",
 	})
 	// Dot
 	engines = append(engines, structs.Engine{
@@ -603,6 +687,8 @@ func init() {
 			nonerr1: respError, nonerr2: respUnmodified, nonerr3: "{##}",
 			nonerrRuby: respError, nonerrDotnet: respError, nonerrJava: respUnmodified, nonerrPHP: respError, nonerrPython: respError, nonerrJavascript: "/#}", nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{= 7*7 }}",
+		VerifyError:     "{{= * }}",
 	})
 	// VelocityJS
 	engines = append(engines, structs.Engine{
@@ -615,6 +701,8 @@ func init() {
 			nonerr1: respError, nonerr2: respUnmodified, nonerr3: "{",
 			nonerrRuby: respUnmodified, nonerrDotnet: respUnmodified, nonerrJava: "a\">", nonerrPHP: respUnmodified, nonerrPython: respError, nonerrJavascript: "//*<!--{", nonerrGolang: respUnmodified, nonerrElixir: respUnmodified, nonerrIdent1: respUnmodified, nonerrIdent2: respError, nonerrIdent3: respEmpty,
 		},
+		VerifyReflected: "#set($foo = 7*7)$foo",
+		VerifyError:     "#set($foo = *)$foo",
 	})
 	// Eta
 	engines = append(engines, structs.Engine{
@@ -627,6 +715,8 @@ func init() {
 			nonerr1: respUnmodified, nonerr2: "1@*#{1}", nonerr3: respUnmodified,
 			nonerrRuby: "1#{2}{{a}}", nonerrDotnet: respUnmodified, nonerrJava: respUnmodified, nonerrPHP: respUnmodified, nonerrPython: respUnmodified, nonerrJavascript: "//*<!--{##1{{!--{{1}}--}}-->*/#}", nonerrGolang: respUnmodified, nonerrElixir: respError, nonerrIdent1: respUnmodified, nonerrIdent2: "${\"\"}", nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "<%= 7*7 %>",
+		VerifyError:     "<%= * %>",
 	})
 	//TwigJS
 	engines = append(engines, structs.Engine{
@@ -639,6 +729,8 @@ func init() {
 			nonerr1: "p \">[[$1]]", nonerr2: respUnmodified, nonerr3: respError,
 			nonerrRuby: "<%=1%>#{2}", nonerrDotnet: "1@*", nonerrJava: respUnmodified, nonerrPHP: "7}", nonerrPython: "}", nonerrJavascript: "//*<!--", nonerrGolang: respError, nonerrElixir: respUnmodified, nonerrIdent1: respError, nonerrIdent2: respUnmodified, nonerrIdent3: respUnmodified,
 		},
+		VerifyReflected: "{{ 7*7 }}",
+		VerifyError:     "{{ 7*7",
 	})
 	/* End Javascript */
 }
