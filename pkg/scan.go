@@ -157,7 +157,7 @@ func Scan(configParam structs.Config, version string, typ int) {
 	if boolReport {
 		PrintVerbose("Suspected vulnerable URLs: "+strconv.Itoa(report.SuspectedInjections)+"\n", Green, 1)
 		PrintVerbose("Suspected template injections: "+strconv.Itoa(report.SuspectedInjections)+"\n", Green, 1)
-		msg = fmt.Sprintf("%d High, %d Medium, %d Low certainty\n\n", report.High, report.Medium, report.Low)
+		msg = fmt.Sprintf("%d Very High, %d High, %d Medium, %d Low, %d Very Low certainty\n\n", report.VeryHigh, report.High, report.Medium, report.Low, report.VeryLow)
 		PrintVerbose(msg, Green, 1)
 	}
 	duration := time.Since(start)
@@ -312,17 +312,26 @@ func scanURL(u string, crawl structs.Crawl, typ int) ReportWebpage {
 			// only add repParam to the report, if the param is vulnerable or if there are error messages or if there are reflections
 			if repParam.IsVulnerable || len(repParam.ErrorMessages) > 0 || len(repParam.Reflections) > 0 || requestError {
 				repWebpage.Parameters = append(repWebpage.Parameters, repParam)
-				if repWebpage.Certainty != certaintyHigh && repWebpage.Certainty != certaintyMedium && repParam.Certainty == certaintyLow {
-					repWebpage.Certainty = certaintyLow
-					report.Low += 1
+				switch repParam.Certainty {
+				case certaintyVeryHigh:
+					repWebpage.Certainty = certaintyVeryHigh
+					report.VeryHigh += 1
 					report.SuspectedInjections += 1
-				} else if repWebpage.Certainty != certaintyHigh && repParam.Certainty == certaintyMedium {
+				case certaintyHigh:
+					repWebpage.Certainty = certaintyHigh
+					report.High += 1
+					report.SuspectedInjections += 1
+				case certaintyMedium:
 					repWebpage.Certainty = certaintyMedium
 					report.Medium += 1
 					report.SuspectedInjections += 1
-				} else if repParam.Certainty == certaintyHigh {
-					repWebpage.Certainty = certaintyHigh
-					report.High += 1
+				case certaintyLow:
+					repWebpage.Certainty = certaintyLow
+					report.Low += 1
+					report.SuspectedInjections += 1
+				case certaintyVeryLow:
+					repWebpage.Certainty = certaintyVeryLow
+					report.VeryLow += 1
 					report.SuspectedInjections += 1
 				}
 			}
@@ -357,17 +366,26 @@ func scanURL(u string, crawl structs.Crawl, typ int) ReportWebpage {
 				// only add repParam to the report, if the param is vulnerable or if there are error messages or if there are reflections
 				if repParam.IsVulnerable || len(repParam.ErrorMessages) > 0 || len(repParam.Reflections) > 0 || requestError {
 					repWebpage.Parameters = append(repWebpage.Parameters, repParam)
-					if repWebpage.Certainty != certaintyHigh && repWebpage.Certainty != certaintyMedium && repParam.Certainty == certaintyLow {
-						repWebpage.Certainty = certaintyLow
-						report.Low += 1
+					switch repParam.Certainty {
+					case certaintyVeryHigh:
+						repWebpage.Certainty = certaintyVeryHigh
+						report.VeryHigh += 1
 						report.SuspectedInjections += 1
-					} else if repWebpage.Certainty != certaintyHigh && repParam.Certainty == certaintyMedium {
+					case certaintyHigh:
+						repWebpage.Certainty = certaintyHigh
+						report.High += 1
+						report.SuspectedInjections += 1
+					case certaintyMedium:
 						repWebpage.Certainty = certaintyMedium
 						report.Medium += 1
 						report.SuspectedInjections += 1
-					} else if repParam.Certainty == certaintyHigh {
-						repWebpage.Certainty = certaintyHigh
-						report.High += 1
+					case certaintyLow:
+						repWebpage.Certainty = certaintyLow
+						report.Low += 1
+						report.SuspectedInjections += 1
+					case certaintyVeryLow:
+						repWebpage.Certainty = certaintyVeryLow
+						report.VeryLow += 1
 						report.SuspectedInjections += 1
 					}
 				}
@@ -415,17 +433,26 @@ func scanURL(u string, crawl structs.Crawl, typ int) ReportWebpage {
 				// only add repParam to the report, if the param is vulnerable or if there are error messages or if there are reflections
 				if repParam.IsVulnerable || len(repParam.ErrorMessages) > 0 || len(repParam.Reflections) > 0 || requestError {
 					repWebpage.Parameters = append(repWebpage.Parameters, repParam)
-					if repWebpage.Certainty != certaintyHigh && repWebpage.Certainty != certaintyMedium && repParam.Certainty == certaintyLow {
-						repWebpage.Certainty = certaintyLow
-						report.Low += 1
+					switch repParam.Certainty {
+					case certaintyVeryHigh:
+						repWebpage.Certainty = certaintyVeryHigh
+						report.VeryHigh += 1
 						report.SuspectedInjections += 1
-					} else if repWebpage.Certainty != certaintyHigh && repParam.Certainty == certaintyMedium {
+					case certaintyHigh:
+						repWebpage.Certainty = certaintyHigh
+						report.High += 1
+						report.SuspectedInjections += 1
+					case certaintyMedium:
 						repWebpage.Certainty = certaintyMedium
 						report.Medium += 1
 						report.SuspectedInjections += 1
-					} else if repParam.Certainty == certaintyHigh {
-						repWebpage.Certainty = certaintyHigh
-						report.High += 1
+					case certaintyLow:
+						repWebpage.Certainty = certaintyLow
+						report.Low += 1
+						report.SuspectedInjections += 1
+					case certaintyVeryLow:
+						repWebpage.Certainty = certaintyVeryLow
+						report.VeryLow += 1
 						report.SuspectedInjections += 1
 					}
 				}

@@ -73,9 +73,11 @@ type (
 		Version                 string   `json:"version"`
 		SuspectedVulnerableURLs int      `json:"suspectedVulnerableURLs"`
 		SuspectedInjections     int      `json:"suspectedTemplateInjections"`
+		VeryHigh                int      `json:"veryHighCertainty"`
 		High                    int      `json:"highCertainty"`
 		Medium                  int      `json:"mediumCertainty"`
 		Low                     int      `json:"lowCertainty"`
+		VeryLow                 int      `json:"veryLowCertainty"`
 		ErrorMessages           []string `json:"errorMessages"`
 		Date                    string   `json:"date"`
 		Duration                string   `json:"duration"`
