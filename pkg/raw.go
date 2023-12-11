@@ -10,9 +10,10 @@ import (
 func ReadRaw(rawPath string, httpP bool) []structs.Crawl {
 	fileRaw, err := os.Open(rawPath)
 	if err != nil {
-		PrintFatal("Error: ReadJSONL: " + err.Error() + "\n")
+		PrintFatal("Error: ReadRaw: " + err.Error() + "\n")
 	}
 	defer fileRaw.Close()
+
 	fileScanner := bufio.NewScanner(fileRaw)
 	index := 0
 	crawl := structs.Crawl{}
@@ -27,13 +28,13 @@ func ReadRaw(rawPath string, httpP bool) []structs.Crawl {
 				crawl.Request.Method = parse[0]
 				path = parse[1]
 			} else {
-				os.Exit(1)
+				PrintFatal("Error: ReadRaw: The first line of the Raw file is malformed\n")
 			}
 		} else {
-			if strings.Index(line, "Host: ") != -1 {
+			if strings.HasPrefix(line, "Host: ") {
 				host = line[6:]
 			} else {
-				parse := strings.Split(line, ":")
+				parse := strings.SplitN(line, ":", 2)
 				if len(parse) > 1 {
 					crawl.Request.Headers[parse[0]] = parse[1]
 				}
