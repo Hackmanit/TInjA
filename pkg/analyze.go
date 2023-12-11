@@ -461,6 +461,7 @@ func checkInjectionIndicators(body string, headers http.Header, status int, poly
 		PrintVerbose(msg+"\n", Cyan, 1)
 		return indicatorNotValid, msg, nil
 	}
+
 	// check1: is the status code different and a 5xx status code. If true, check if the default status code has changed!
 	if defaultStatus != status && strings.HasPrefix(strconv.Itoa(status), "5") {
 		req, err := buildRequest(u, config)
@@ -483,7 +484,7 @@ func checkInjectionIndicators(body string, headers http.Header, status int, poly
 			return indicatorNotValid, conclusion, errors.New(conclusion)
 		} else {
 			// check if backshlashed also triggers error
-			if polytype == DEFAULT {
+			if polytype == DEFAULT || polytype == VERIFYERROR {
 				if indicator, _ := sendPolyglot(name, typ, backslashPolyglot(polyglot), u, BACKSLASHED); indicator == indicatorError {
 					conclusion = "The backshlashed polyglot also throws an error; Therefore the error is most likely not thrown by a template engine."
 					return indicatorNotValid, conclusion, nil
@@ -492,7 +493,7 @@ func checkInjectionIndicators(body string, headers http.Header, status int, poly
 
 			checkResponses(polyglot, []string{respError}, polytype)
 			conclusion = "The polyglot " + polyglot + " triggered an error: Status Code " + strconv.Itoa(status)
-			if polytype == DEFAULT {
+			if polytype == DEFAULT || polytype == VERIFYERROR {
 				Print(conclusion+"\n", Yellow)
 			} else {
 				PrintVerbose("Backslashed: "+conclusion+"\n", Cyan, 2)

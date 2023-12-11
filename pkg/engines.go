@@ -301,8 +301,8 @@ func init() {
 			nonerr1: respUnmodified, nonerr2: respUnmodified, nonerr3: "{",
 			nonerrRuby: respUnmodified, nonerrDotnet: respUnmodified, nonerrJava: "a\">", nonerrPHP: respUnmodified, nonerrPython: respUnmodified, nonerrJavascript: "//*<!--{", nonerrGolang: respUnmodified, nonerrElixir: respUnmodified, nonerrIdent1: respUnmodified, nonerrIdent2: respUnmodified, nonerrIdent3: "a",
 		},
-		VerifyReflected: "#set( $foo = 7*7) $foo",
-		VerifyError:     "#set( a",
+		VerifyReflected: "#set($foo = 7*7)$foo",
+		VerifyError:     "#set(a",
 	})
 	// Thymeleaf
 	engines = append(engines, structs.Engine{
