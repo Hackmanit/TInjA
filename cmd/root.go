@@ -55,8 +55,9 @@ var rootCmd = &cobra.Command{
 	Short:   "TInjA - the Template INJection Analyzer",
 	Long:    getLogo() + "\n\nthe Template INJection Analyzer. (" + version + ")\n" + getCopyright(),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getLogo() + "\n\nthe Template INJection Analyzer. (" + version + ")")
+		fmt.Println(getLogo() + "\n\nthe Template INJection Analyzer. (" + version + ")\n" + getCopyright() + "\n")
 		fmt.Println("Use 'tinja url' to scan a single or multiple URLs.")
+		fmt.Println("Use 'tinja raw' to scan a single URL using a raw file.")
 		fmt.Println("Use 'tinja jsonl' to scan a single or multiple URLs using crawl results from a jsonl file.")
 	},
 }
