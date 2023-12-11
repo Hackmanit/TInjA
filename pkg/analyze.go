@@ -331,7 +331,7 @@ func verifyTemplateInjection(name string, typ int, u string) (string, []reportRe
 	for _, possibleEngine := range possibleEngines {
 		for _, engine := range engines {
 			if engine.Name == possibleEngine {
-				Print("Verifying "+engine.Name+".\n", NoColor)
+				Print("Verifying "+engine.Name+".\n", Cyan)
 				_, repRequest = sendPolyglot(name, typ, engine.VerifyReflected, u, VERIFYREFLECTED)
 				if boolReport {
 					repRequests = append(repRequests, repRequest)
@@ -421,21 +421,6 @@ func sendPolyglot(name string, typ int, polyglot string, u string, polytype int)
 	if boolReport {
 		repRequest.Response = dumpRes
 		repRequest.Request = string(dumpReqBytes)
-	}
-
-	// Add the request as curl command to the report
-	command, err := http2curl.GetCurlCommand(req)
-	if err != nil {
-		PrintVerbose("Error: sendPolyglot: "+err.Error()+"\n", Yellow, 1)
-		repRequest.Error = err.Error()
-	}
-	commandFixed := strings.Replace(command.String(), "-d ''", "-d '"+string(bodyBackup)+"'", 1)
-	if boolReport {
-		repRequest.CurlCommand = commandFixed
-	}
-	PrintVerbose("Curl command: "+commandFixed+"\n", NoColor, 2)
-
-	if boolReport {
 		repRequest.Polyglot = polyglot
 	}
 
@@ -453,6 +438,19 @@ func sendPolyglot(name string, typ int, polyglot string, u string, polytype int)
 	if respIndicator != indicatorError && respIndicator != indicatorNotValid && polytype == DEFAULT {
 		onlyErrorResponses = false
 	}
+
+	// Add the request as curl command to the report
+	command, err := http2curl.GetCurlCommand(req)
+	if err != nil {
+		PrintVerbose("Error: sendPolyglot: "+err.Error()+"\n", Yellow, 1)
+		repRequest.Error = err.Error()
+	}
+	commandFixed := strings.Replace(command.String(), "-d ''", "-d '"+string(bodyBackup)+"'", 1)
+	if boolReport {
+		repRequest.CurlCommand = commandFixed
+	}
+	PrintVerbose("Curl command: "+commandFixed+"\n", NoColor, 2)
+
 	return respIndicator, repRequest
 }
 
@@ -525,12 +523,12 @@ func checkInjectionIndicators(body string, headers http.Header, status int, poly
 				} else if response == respIdentified {
 					return indicatorIdentified, conclusion, nil
 				}
-				if polytype == DEFAULT && response == respUnmodified && config.CSTI && strings.Contains(bodyToCheck, "</script>") {
+				if polytype != BACKSLASHED && response == respUnmodified && config.CSTI && strings.Contains(bodyToCheck, "</script>") {
 					var bodyNew string
 					bodyNew, err = runHTMLinHeadless(bodyToCheck, urlHeadless)
 					response, conclusion = checkBodyIndicator(bodyNew, polyglot, reflection, polytype, name, typ, u)
 				}
-				if polytype == DEFAULT && response == respError && !backslashedSend {
+				if (polytype == DEFAULT || polytype == VERIFYERROR) && response == respError && !backslashedSend {
 					// check if backshlashed also triggers error
 					if indicator, _ := sendPolyglot(name, typ, backslashPolyglot(polyglot), u, BACKSLASHED); indicator == indicatorError {
 						backslashedErrorsToo = true
@@ -566,7 +564,7 @@ func checkInjectionIndicators(body string, headers http.Header, status int, poly
 		}
 		msg := "The polyglot " + polyglot + " returned the response(s) " + fmt.Sprint(printResponses)
 		conclusion = conclusion + msg
-		if polytype == DEFAULT {
+		if polytype != BACKSLASHED {
 			Print(msg+"\n", Cyan)
 		} else {
 			PrintVerbose("Backslashed: "+msg+"\n", Cyan, 2)
