@@ -124,10 +124,9 @@ func analyze(name string, typ int, u string) (reportParameter, bool) {
 		if boolReport && err != nil {
 			repParam.ErrorMessages = append(repParam.ErrorMessages, err.Error())
 		}
-	}
-
-	if repParam.TemplateEngine == "" {
-		repParam.TemplateEngine = "unknown"
+		if repParam.TemplateEngine == "" {
+			repParam.TemplateEngine = "unknown"
+		}
 	}
 
 	certainty := "None"
