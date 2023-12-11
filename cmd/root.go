@@ -41,12 +41,12 @@ var (
 )
 
 var ( // commandline flags
-	timeout, verbosity, precedingLength, subsequentLength, lengthLimit int
-	ratelimit                                                          float64
-	cfgFile, data, reportPath, proxyCertPath, proxyURL, jsonlPath      string
-	cookies, headers, parameters, urls, urlsReflection                 []string
-	config                                                             structs.Config
-	uac, csti, escapeJSON                                              bool
+	timeout, verbosity, precedingLength, subsequentLength, lengthLimit     int
+	ratelimit                                                              float64
+	cfgFile, data, reportPath, proxyCertPath, proxyURL, jsonlPath, rawPath string
+	cookies, headers, parameters, urls, urlsReflection                     []string
+	config                                                                 structs.Config
+	uac, csti, escapeJSON, httpP                                           bool
 )
 
 var rootCmd = &cobra.Command{
@@ -169,6 +169,10 @@ func initConfig() {
 
 	// get crawls
 	var crawls []structs.Crawl
+	if rawPath != "" {
+		crawls = pkg.ReadRaw(rawPath, httpP)
+	}
+
 	if jsonlPath != "" {
 		crawls = pkg.ReadJSONL(jsonlPath)
 	}
