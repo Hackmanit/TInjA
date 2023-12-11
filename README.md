@@ -1,5 +1,7 @@
+[![Release](https://img.shields.io/github/release/Hackmanit/TInjA.svg?color=brightgreen)](https://github.com/Hackmanit/TInjA/releases/latest)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Hackmanit/TInjA)](https://goreportcard.com/report/github.com/Hackmanit/TInjA)
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Hackmanit/TInjA)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-
 # TInjA – the Template INJection Analyzer
 
 TInjA is a CLI tool for testing web pages for **template injection** vulnerabilities.
