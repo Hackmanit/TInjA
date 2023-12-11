@@ -53,7 +53,7 @@ var rootCmd = &cobra.Command{
 	Use:     "tinja",
 	Version: version,
 	Short:   "TInjA - the Template INJection Analyzer",
-	Long:    getLogo() + "\n\nthe Template INJection Analyzer. (" + version + ")",
+	Long:    getLogo() + "\n\nthe Template INJection Analyzer. (" + version + ")\n" + getCopyright(),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getLogo() + "\n\nthe Template INJection Analyzer. (" + version + ")")
 		fmt.Println("Use 'tinja url' to scan a single or multiple URLs.")
@@ -227,6 +227,15 @@ __/\\\\\\\\\\\\\\\__/\\\\\\\\\\\______________________________/\\\\\\\\\____
         _______\///________\///////////__\///____\///___\//////___\///________\///__`
 
 	logo = strings.ReplaceAll(logo, "_", color.HiRedString("_"))
+
+	return
+}
+
+func getCopyright() (copyright string) {
+	copyright = `
+Published by Hackmanit under http://www.apache.org/licenses/LICENSE-2.0
+Author: Maximilian Hildebrand
+Repository: https://github.com/Hackmanit/TInjA`
 
 	return
 }

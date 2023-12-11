@@ -19,9 +19,11 @@ import (
 	"os"
 )
 
+var certaintyVeryHigh = "Very High"
 var certaintyHigh = "High"
 var certaintyMedium = "Medium"
 var certaintyLow = "Low"
+var certaintyVeryLow = "Very Low"
 
 type (
 	// reportRequest represents a request in the report.

@@ -162,6 +162,7 @@ To scan HTTPS URLs using a proxy a CA certificate of the proxy in PEM format is 
 - Optional: Blind SSTI Payloads (e.g., sleep payloads).
 - Feedback, whether CSTI or SSTI was detected.
 - Check headless browser's console for template engine error messages (see https://github.com/go-rod/rod/issues/330).
+- Improve Error Detection, when input is not reflected
 
 ## Background Information
 A blog post providing more information about template injection and [TInjA – the Template INJection Analyzer](https://github.com/Hackmanit/TInjA) can be found here:

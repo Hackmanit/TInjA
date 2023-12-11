@@ -9,6 +9,7 @@ import (
 var urlCmd = &cobra.Command{
 	Use:   "url",
 	Short: "Scan a single or multiple URLs",
+	Long:  getLogo() + "\n\nthe Template INJection Analyzer. (" + version + ")\n" + getCopyright(),
 	Run: func(cmd *cobra.Command, args []string) {
 		pkg.Scan(config, version, pkg.URL)
 	},

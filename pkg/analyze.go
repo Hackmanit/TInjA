@@ -12,6 +12,8 @@ The `analyze.go` file contains a package called `pkg` that provides functionalit
 
 - `identifyTemplateEngine(name string, typ int, u string) (string, []reportRequest, error)`: This method identifies the template engine used in the vulnerability. It takes in the name, type, and URL as parameters. If the engine was already identified during the detection phase, it returns its name. Otherwise, it sends polyglots and checks the response to identify the engine. It returns the identified engine's name, a slice of `reportRequest` containing the details of the requests made, and an error if any.
 
+- `verifyTemplateInjection(name string, typ int, u string) (string, []reportRequest, error)`: This method identifies the template engine used in the vulnerability. It takes in the name, type, and URL as parameters. It verifies a template injection by sending template expressions tailored to the specific template engine. It returns the identified engine's name, a slice of `reportRequest` containing the details of the requests made, and an error if any.
+
 - `sendPolyglot(name string, typ int, polyglot string, u string) (int, reportRequest)`: This method sends a polyglot request to test for vulnerabilities. It takes in the name, type, polyglot, and URL as parameters. It builds an HTTP request, sets the request parameters based on the type, and performs the request. It returns the response code and a `reportRequest` struct containing the details of the request and response.
 
 - `checkInjectionIndicators(body string, headers http.Header, status int, polyglot string, u string, typ int) (int, string, error)`: This method checks for injection indicators in the response body, headers, and status. It takes in the response body, headers, status code, polyglot, URL, and type as parameters. It checks if the status code is different and if the default status code has changed. If there are reflections, it checks for indicators in the body. It also handles specific cases for different template engines. It returns the indicator code, conclusion message, and an error if any.
@@ -74,6 +76,13 @@ var rodBrowser *rod.Browser
 var statusCodeChanged bool
 var CounterPolyglotsGlobal = 0
 
+const (
+	DEFAULT         = 0
+	BACKSLASHED     = 1
+	VERIFYREFLECTED = 2
+	VERIFYERROR     = 3
+)
+
 func init() {
 	rodBrowser = rod.New()
 }
@@ -82,7 +91,7 @@ func init() {
 func analyze(name string, typ int, u string) (reportParameter, bool) {
 	// Initialize report parameter and request slices
 	var repParam reportParameter
-	var requestsDetect, requestsIdentify []reportRequest
+	var requestsDetect, requestsIdentify, requestsVerify []reportRequest
 	var detected bool
 	var err error
 
@@ -109,20 +118,33 @@ func analyze(name string, typ int, u string) (reportParameter, bool) {
 		}
 	}
 
-	certainty := "None"
-	if repParam.TemplateEngine == "unknown" && !recievedModifiedRenderedResponse {
-		certainty = certaintyLow
-	} else if repParam.TemplateEngine == "unknown" && recievedModifiedRenderedResponse {
-		certainty = certaintyMedium
-	} else if repParam.TemplateEngine != "" && !recievedModifiedRenderedResponse {
-		// The host header has great limitations which characters are allowed and which not. This often leads to false positives for template engines which often responds with unmodified or error, like dot
-		if typ == HEADER && strings.EqualFold(name, "host") {
-			certainty = certaintyLow
-		} else {
-			certainty = certaintyMedium
+	// If a template engine is identified, verify the template injection with tailored template expressions
+	if repParam.TemplateEngine != "unknown" && repParam.TemplateEngine != "" {
+		repParam.TemplateEngine, requestsVerify, err = verifyTemplateInjection(name, typ, u)
+		if boolReport && err != nil {
+			repParam.ErrorMessages = append(repParam.ErrorMessages, err.Error())
 		}
-	} else if repParam.TemplateEngine != "" && recievedModifiedRenderedResponse {
-		certainty = certaintyHigh
+		if repParam.TemplateEngine == "" {
+			repParam.TemplateEngine = "unknown"
+		}
+	}
+
+	certainty := "None"
+	if detected {
+		if repParam.TemplateEngine == "unknown" && !recievedModifiedRenderedResponse {
+			certainty = certaintyVeryLow
+		} else if repParam.TemplateEngine == "unknown" && recievedModifiedRenderedResponse {
+			certainty = certaintyLow
+		} else if !recievedModifiedRenderedResponse {
+			// The host header has great limitations which characters are allowed and which not. This often leads to false positives for template engines which often responds with unmodified or error, like dot
+			if typ == HEADER && strings.EqualFold(name, "host") {
+				certainty = certaintyMedium
+			} else {
+				certainty = certaintyHigh
+			}
+		} else if recievedModifiedRenderedResponse {
+			certainty = certaintyVeryHigh
+		}
 	}
 
 	if boolReport {
@@ -131,6 +153,7 @@ func analyze(name string, typ int, u string) (reportParameter, bool) {
 		repParam.AreErrorsThrown = errorShown
 		repParam.Requests = append(repParam.Requests, requestsDetect...)
 		repParam.Requests = append(repParam.Requests, requestsIdentify...)
+		repParam.Requests = append(repParam.Requests, requestsVerify...)
 		repParam.Certainty = certainty
 		repParam.IsVulnerable = repParam.TemplateEngine != ""
 	}
@@ -203,7 +226,7 @@ func detectTemplateInjection(name string, typ int, u string) (bool, []reportRequ
 	success := false
 
 	// Check if triggering error is possible with universal error polyglot
-	respCode, repRequest = sendPolyglot(name, typ, err1, u, false)
+	respCode, repRequest = sendPolyglot(name, typ, err1, u, DEFAULT)
 	errorShown = respCode == indicatorError || respCode == indicatorIdentified
 	polyglotMap[err1] = tested
 	success = errorShown
@@ -223,7 +246,7 @@ func detectTemplateInjection(name string, typ int, u string) (bool, []reportRequ
 		if getIdentifiedEngine() != "" && getIdentifiedEngine() != "unkown" && (!reflected || (reflected && recievedModifiedRenderedResponse)) {
 			return true, repRequests
 		}
-		if respCode, repRequest = sendPolyglot(name, typ, polyglot, u, false); respCode != indicatorNone && respCode != indicatorUnmodified && respCode != indicatorNotValid {
+		if respCode, repRequest = sendPolyglot(name, typ, polyglot, u, DEFAULT); respCode != indicatorNone && respCode != indicatorUnmodified && respCode != indicatorNotValid {
 			success = true
 		}
 		polyglotMap[polyglot] = tested
@@ -240,7 +263,7 @@ func detectTemplateInjection(name string, typ int, u string) (bool, []reportRequ
 			return true, repRequests
 		}
 		for polyglot := range polyglotMap {
-			if respCode, repRequest = sendPolyglot(name, typ, polyglot, u, false); respCode != indicatorNone && respCode != indicatorUnmodified && respCode != indicatorNotValid {
+			if respCode, repRequest = sendPolyglot(name, typ, polyglot, u, DEFAULT); respCode != indicatorNone && respCode != indicatorUnmodified && respCode != indicatorNotValid {
 				success = true
 			}
 			polyglotMap[polyglot] = tested
@@ -257,6 +280,7 @@ func detectTemplateInjection(name string, typ int, u string) (bool, []reportRequ
 	return success, repRequests
 }
 
+// identify a Template Engine
 func identifyTemplateEngine(name string, typ int, u string) (string, []reportRequest, error) {
 	var repRequests []reportRequest
 	var repRequest reportRequest
@@ -265,13 +289,13 @@ func identifyTemplateEngine(name string, typ int, u string) (string, []reportReq
 	if getIdentifiedEngine() != "" && getIdentifiedEngine() != "unkown" && (!reflected || (reflected && recievedModifiedRenderedResponse)) && !onlyErrorResponses {
 		return getIdentifiedEngine(), nil, err
 	}
-	Print("\nA template engine was successfully detected and is now being identified.\n", NoColor)
+	Print("\nA template injection was detected and the template engine is now being identified.\n", NoColor)
 	for polyglot := range polyglotMap {
 		if statusCodeChanged {
 			break
 		}
 		if hasPolyglotImpact(polyglot) {
-			_, repRequest = sendPolyglot(name, typ, polyglot, u, false)
+			_, repRequest = sendPolyglot(name, typ, polyglot, u, DEFAULT)
 			polyglotMap[polyglot] = tested
 			if boolReport {
 				repRequests = append(repRequests, repRequest)
@@ -293,7 +317,38 @@ func identifyTemplateEngine(name string, typ int, u string) (string, []reportReq
 	return getAllPossibleEngines(), repRequests, err
 }
 
-func sendPolyglot(name string, typ int, polyglot string, u string, backslashed bool) (int, reportRequest) {
+// verify the injection by sending template expressions tailored to the specifc template engine engine
+func verifyTemplateInjection(name string, typ int, u string) (string, []reportRequest, error) {
+	var repRequests []reportRequest
+	var repRequest reportRequest
+	var err error
+
+	Print("\nVerifying the template injection by issuing template expressions tailored to the specific template engine.\n", NoColor)
+	possibleEngines := strings.Split(getAllPossibleEngines(), ", ")
+	if len(possibleEngines) == 0 {
+		Print("verifyTemplateInjection: len(engines) == 0\n", Red)
+	}
+	for _, possibleEngine := range possibleEngines {
+		for _, engine := range engines {
+			if engine.Name == possibleEngine {
+				Print("Verifying "+engine.Name+".\n", Cyan)
+				_, repRequest = sendPolyglot(name, typ, engine.VerifyReflected, u, VERIFYREFLECTED)
+				if boolReport {
+					repRequests = append(repRequests, repRequest)
+				}
+				if !reflected {
+					_, repRequest = sendPolyglot(name, typ, engine.VerifyError, u, VERIFYERROR)
+					if boolReport {
+						repRequests = append(repRequests, repRequest)
+					}
+				}
+			}
+		}
+	}
+	return getAllPossibleEngines(), repRequests, err
+}
+
+func sendPolyglot(name string, typ int, polyglot string, u string, polytype int) (int, reportRequest) {
 	// Initialize report request and response indicator variables
 	var repRequest reportRequest
 	var respIndicator int
@@ -348,7 +403,7 @@ func sendPolyglot(name string, typ int, polyglot string, u string, backslashed b
 		dumpReqBytes, _ = httputil.DumpRequest(req, false)
 	}
 
-	if !backslashed {
+	if polytype == DEFAULT {
 		CounterPolyglotsGlobal++
 	}
 
@@ -366,6 +421,22 @@ func sendPolyglot(name string, typ int, polyglot string, u string, backslashed b
 	if boolReport {
 		repRequest.Response = dumpRes
 		repRequest.Request = string(dumpReqBytes)
+		repRequest.Polyglot = polyglot
+	}
+
+	// Check injection indicators in the response body, headers, and status
+	respIndicator, repRequest.Conclusion, err = checkInjectionIndicators(body, headers, status, polyglot, u, typ, polytype, name)
+	if err != nil {
+		PrintVerbose("Error: sendPolyglot: "+err.Error()+"\n", Yellow, 1)
+		if boolReport {
+			repRequest.Error = err.Error()
+		}
+	}
+	if respIndicator == indicatorIdentified {
+		recievedModifiedRenderedResponse = true
+	}
+	if respIndicator != indicatorError && respIndicator != indicatorNotValid && polytype == DEFAULT {
+		onlyErrorResponses = false
 	}
 
 	// Add the request as curl command to the report
@@ -380,34 +451,17 @@ func sendPolyglot(name string, typ int, polyglot string, u string, backslashed b
 	}
 	PrintVerbose("Curl command: "+commandFixed+"\n", NoColor, 2)
 
-	if boolReport {
-		repRequest.Polyglot = polyglot
-	}
-
-	// Check injection indicators in the response body, headers, and status
-	respIndicator, repRequest.Conclusion, err = checkInjectionIndicators(body, headers, status, polyglot, u, typ, backslashed, name)
-	if err != nil {
-		PrintVerbose("Error: sendPolyglot: "+err.Error()+"\n", Yellow, 1)
-		if boolReport {
-			repRequest.Error = err.Error()
-		}
-	}
-	if respIndicator == indicatorIdentified {
-		recievedModifiedRenderedResponse = true
-	}
-	if respIndicator != indicatorError && respIndicator != indicatorNotValid && !backslashed {
-		onlyErrorResponses = false
-	}
 	return respIndicator, repRequest
 }
 
-func checkInjectionIndicators(body string, headers http.Header, status int, polyglot string, u string, typ int, backslashed bool, name string) (int, string, error) {
+func checkInjectionIndicators(body string, headers http.Header, status int, polyglot string, u string, typ int, polytype int, name string) (int, string, error) {
 	var conclusion, response string
 	if typ == HEADER && strings.HasPrefix(strconv.Itoa(status), "4") {
 		msg := "The polyglot " + polyglot + " was rejected with a " + strconv.Itoa(status)
 		PrintVerbose(msg+"\n", Cyan, 1)
 		return indicatorNotValid, msg, nil
 	}
+
 	// check1: is the status code different and a 5xx status code. If true, check if the default status code has changed!
 	if defaultStatus != status && strings.HasPrefix(strconv.Itoa(status), "5") {
 		req, err := buildRequest(u, config)
@@ -418,7 +472,7 @@ func checkInjectionIndicators(body string, headers http.Header, status int, poly
 		}
 		_, _, checkStatus, _, err := doRequest(req)
 		if err != nil {
-			checkResponses(polyglot, []string{respError}, backslashed)
+			checkResponses(polyglot, []string{respError}, polytype)
 			conclusion = fmt.Sprintf("Couldn't connect to URL: %s", err.Error())
 			Print(conclusion+"\n", Red)
 			return indicatorNotValid, conclusion, err
@@ -430,16 +484,16 @@ func checkInjectionIndicators(body string, headers http.Header, status int, poly
 			return indicatorNotValid, conclusion, errors.New(conclusion)
 		} else {
 			// check if backshlashed also triggers error
-			if !backslashed {
-				if indicator, _ := sendPolyglot(name, typ, backslashPolyglot(polyglot), u, true); indicator == indicatorError {
+			if polytype == DEFAULT || polytype == VERIFYERROR {
+				if indicator, _ := sendPolyglot(name, typ, backslashPolyglot(polyglot), u, BACKSLASHED); indicator == indicatorError {
 					conclusion = "The backshlashed polyglot also throws an error; Therefore the error is most likely not thrown by a template engine."
 					return indicatorNotValid, conclusion, nil
 				}
 			}
 
-			checkResponses(polyglot, []string{respError}, backslashed)
+			checkResponses(polyglot, []string{respError}, polytype)
 			conclusion = "The polyglot " + polyglot + " triggered an error: Status Code " + strconv.Itoa(status)
-			if !backslashed {
+			if polytype == DEFAULT || polytype == VERIFYERROR {
 				Print(conclusion+"\n", Yellow)
 			} else {
 				PrintVerbose("Backslashed: "+conclusion+"\n", Cyan, 2)
@@ -464,20 +518,20 @@ func checkInjectionIndicators(body string, headers http.Header, status int, poly
 					bodyToCheck = reflectionBodies[reflection.ReflectionURL]
 					urlHeadless = reflection.ReflectionURL
 				}
-				response, conclusion = checkBodyIndicator(bodyToCheck, polyglot, reflection, backslashed, name, typ, u)
+				response, conclusion = checkBodyIndicator(bodyToCheck, polyglot, reflection, polytype, name, typ, u)
 				if response == respContinue {
 					continue
 				} else if response == respIdentified {
 					return indicatorIdentified, conclusion, nil
 				}
-				if !backslashed && response == respUnmodified && config.CSTI && strings.Contains(bodyToCheck, "</script>") {
+				if polytype != BACKSLASHED && response == respUnmodified && config.CSTI && strings.Contains(bodyToCheck, "</script>") {
 					var bodyNew string
 					bodyNew, err = runHTMLinHeadless(bodyToCheck, urlHeadless)
-					response, conclusion = checkBodyIndicator(bodyNew, polyglot, reflection, backslashed, name, typ, u)
+					response, conclusion = checkBodyIndicator(bodyNew, polyglot, reflection, polytype, name, typ, u)
 				}
-				if !backslashed && response == respError && !backslashedSend {
+				if (polytype == DEFAULT || polytype == VERIFYERROR) && response == respError && !backslashedSend {
 					// check if backshlashed also triggers error
-					if indicator, _ := sendPolyglot(name, typ, backslashPolyglot(polyglot), u, true); indicator == indicatorError {
+					if indicator, _ := sendPolyglot(name, typ, backslashPolyglot(polyglot), u, BACKSLASHED); indicator == indicatorError {
 						backslashedErrorsToo = true
 					}
 					backslashedSend = true
@@ -493,7 +547,7 @@ func checkInjectionIndicators(body string, headers http.Header, status int, poly
 				conclusion = ""
 				for _, headerValue := range headers.Values(reflection.HeaderName) {
 					var conclusionAppend string
-					response, conclusionAppend = checkBodyIndicator(headerValue, polyglot, reflection, backslashed, name, typ, u)
+					response, conclusionAppend = checkBodyIndicator(headerValue, polyglot, reflection, polytype, name, typ, u)
 					conclusion += conclusionAppend
 					responses = append(responses, response)
 				}
@@ -511,12 +565,12 @@ func checkInjectionIndicators(body string, headers http.Header, status int, poly
 		}
 		msg := "The polyglot " + polyglot + " returned the response(s) " + fmt.Sprint(printResponses)
 		conclusion = conclusion + msg
-		if !backslashed {
+		if polytype != BACKSLASHED {
 			Print(msg+"\n", Cyan)
 		} else {
 			PrintVerbose("Backslashed: "+msg+"\n", Cyan, 2)
 		}
-		return checkResponses(polyglot, responses, backslashed), conclusion, err
+		return checkResponses(polyglot, responses, polytype), conclusion, err
 	} else {
 		PrintVerbose("The polyglot "+polyglot+" did not trigger an error and input is being not reflected\n", NoColor, 2)
 	}
@@ -533,12 +587,27 @@ func backslashPolyglot(polyglot string) string {
 	return result.String()
 }
 
-func checkResponses(polyglot string, responses []string, backslashed bool) int {
+func checkResponses(polyglot string, responses []string, polytype int) int {
 	matchGlobal := false
 	onlyUnmodified := true
 	errorThrown := false
 	for _, engine := range engines {
 		match := false
+
+		var expected string
+		switch polytype {
+		case DEFAULT, BACKSLASHED:
+			expected = engine.Polyglots[polyglot]
+		case VERIFYREFLECTED:
+			if strings.Contains(polyglot, "7") {
+				expected = "49"
+			} else {
+				expected = "SHOW"
+			}
+		case VERIFYERROR:
+			expected = respError
+		}
+
 		for _, response := range responses {
 			encodedUnmodified, _ := isEncoded(response, polyglot)
 			if response != respUnmodified && !encodedUnmodified {
@@ -547,21 +616,22 @@ func checkResponses(polyglot string, responses []string, backslashed bool) int {
 			if response == respError {
 				errorThrown = true
 			}
-			encoded, _ := isEncoded(response, engine.Polyglots[polyglot])
+
+			encoded, _ := isEncoded(response, expected)
 			// Skip if no errors are shown and the engine's anticipated response would be an error AND the response is either empty or unmodified
-			if engine.Polyglots[polyglot] == respError && !errorShown && (response == respUnmodified || response == respEmpty || encoded) {
+			if expected == respError && !errorShown && (response == respUnmodified || response == respEmpty || encoded) {
 				match = true
 				matchGlobal = true
 				break
 			}
-			if response == engine.Polyglots[polyglot] || encoded || (engine.Polyglots[polyglot] == respUnmodified && encodedUnmodified) {
+			if response == expected || encoded || (expected == respUnmodified && encodedUnmodified) {
 				match = true
 				matchGlobal = true
 				break
 			}
 			// if an engines polyglot contains Arbitrary chars, we need to do a regex check
-			if strings.Contains(engine.Polyglots[polyglot], "ARBITRARY") {
-				for i, poly := range []string{engine.Polyglots[polyglot], html.EscapeString(engine.Polyglots[polyglot]), url.QueryEscape(engine.Polyglots[polyglot]), url.PathEscape(engine.Polyglots[polyglot])} {
+			if strings.Contains(expected, "ARBITRARY") {
+				for i, poly := range []string{expected, html.EscapeString(expected), url.QueryEscape(expected), url.PathEscape(expected)} {
 					splitted := strings.Split(poly, "ARBITRARY")
 					arbitrary := ".*"
 					if len(splitted) == 3 {
@@ -573,7 +643,7 @@ func checkResponses(polyglot string, responses []string, backslashed bool) int {
 						matchGlobal = true
 						break
 					} else if i == 0 {
-						// both check html.UnescapeString(response) as well as html.EscapeString(engine.Polyglots[polyglot]), because escape and unescape might behave differently
+						// both check html.UnescapeString(response) as well as html.EscapeString(expected), because escape and unescape might behave differently
 						if matchExpr, _ := regexp.MatchString(pattern, html.UnescapeString(response)); matchExpr {
 							match = true
 							matchGlobal = true
@@ -583,9 +653,9 @@ func checkResponses(polyglot string, responses []string, backslashed bool) int {
 				}
 			}
 		}
-		if !match && !backslashed {
+		if !match && polytype != BACKSLASHED {
 			// Skip for first universal error polyglot, as it might mean, that errors are catched
-			if polyglot == err1 && engine.Polyglots[polyglot] == respError {
+			if polyglot == err1 && expected == respError {
 				continue
 			}
 			possibleEngines[engine.Name] = false
@@ -692,20 +762,21 @@ func runHTMLinHeadless(html string, url string) (string, error) {
 	return returnVal, err
 }
 
-func checkBodyIndicator(body string, polyglot string, reflection structs.Reflection, backslashed bool, name string, typ int, u string) (string, string) {
+func checkBodyIndicator(body string, polyglot string, reflection structs.Reflection, polytype int, name string, typ int, u string) (string, string) {
 	var conclusion string
+
 	// Thymeleaf / ThymeleafInline specific
 	if strings.Contains(body, "org.thymeleaf.exceptions") && strings.Contains(body, polyglot) {
 		possible := []string{}
 		for _, engine := range engines {
 			if engine.Name == "Thymeleaf" || engine.Name == "Thymeleaf (Inline)" {
-				if engine.Polyglots[polyglot] == respError {
+				if engine.Polyglots[polyglot] == respError || polytype == VERIFYERROR {
 					possible = append(possible, engine.Name)
 				}
 			}
 		}
 		conclusion = fmt.Sprint("The polyglot "+polyglot+" triggered a ", possible, " error message")
-		if !backslashed {
+		if polytype == DEFAULT {
 			Print(conclusion+"\n", Green)
 		} else {
 			PrintVerbose("Backslashed: "+conclusion+"\n", Cyan, 2)
@@ -716,7 +787,7 @@ func checkBodyIndicator(body string, polyglot string, reflection structs.Reflect
 	switch stringBetween := between(body, reflection.Preceding, reflection.Subsequent); stringBetween {
 	case BothMissing:
 		conclusion = "The polyglot " + polyglot + " triggered an error: " + BothMissing
-		if !backslashed {
+		if polytype == DEFAULT {
 			Print(conclusion+"\n", Yellow)
 		} else {
 			PrintVerbose("Backslashed: "+conclusion+"\n", Cyan, 2)
@@ -724,7 +795,7 @@ func checkBodyIndicator(body string, polyglot string, reflection structs.Reflect
 		return respError, conclusion
 	case PrecedingMissing:
 		conclusion = "The polyglot " + polyglot + " triggered a PrecedingMissing"
-		if !backslashed {
+		if polytype == DEFAULT {
 			Print(conclusion+"\n", Yellow)
 		} else {
 			PrintVerbose("Backslashed: "+conclusion+"\n", Cyan, 2)
@@ -761,15 +832,26 @@ func checkBodyIndicator(body string, polyglot string, reflection structs.Reflect
 		/* Velocity / Velocityjs / Cheetah3 + HoganJS + Pug specific */
 		possible := []string{}
 		for _, engine := range engines {
+
+			var expected string
+			switch polytype {
+			case DEFAULT, BACKSLASHED:
+				expected = engine.Polyglots[polyglot]
+			case VERIFYREFLECTED:
+				expected = "49"
+			case VERIFYERROR:
+				expected = respError
+			}
+
 			switch engine.Name {
 			// all 3 might remove everything after the polyglot in the same line
 			case "Cheetah3", "Velocity", "VelocityJS":
 				if !possibleEngines[engine.Name] {
 					continue
 				}
-				if strings.Contains(body, reflection.Preceding+engine.Polyglots[polyglot]) {
+				if strings.Contains(body, reflection.Preceding+expected) {
 					possible = append(possible, engine.Name)
-					conclusion = "Subsequent was removed and " + engine.Polyglots[polyglot] + " rendered"
+					conclusion = "Subsequent was removed and " + expected + " rendered"
 				}
 			// HoganJS might remove the first subsequent character
 			case "HoganJS":
@@ -777,18 +859,17 @@ func checkBodyIndicator(body string, polyglot string, reflection structs.Reflect
 				if betweenHogan == "" {
 					betweenHogan = respEmpty
 				}
-				if betweenHogan == engine.Polyglots[polyglot] {
-					conclusion = "The first subsequent character was removed and " + engine.Polyglots[polyglot] + " rendered"
+				if betweenHogan == expected {
+					conclusion = "The first subsequent character was removed and " + expected + " rendered"
 					Print(conclusion+"\n", Green)
 					setTemplateEngine([]string{"HoganJS"})
 					return respIdentified, conclusion
 				}
 			// Pug messes with the subsequent string. Because nonce => <nonce></nonce>
 			case "Pug":
-				pugsExpectedAnswer := engine.Polyglots[polyglot]
-				// if len(engine.Polyglots[polyglot]) > 10, then it isn't "error", "unmodified" or so on
-				if len(pugsExpectedAnswer) > 10 && pugsExpectedAnswer != respError && pugsExpectedAnswer != respEmpty && pugsExpectedAnswer != respUnmodified && strings.Contains(body, pugsExpectedAnswer) {
-					conclusion = "Subsequent was modified and " + pugsExpectedAnswer + " rendered"
+				// if len(expected) > 10, then it isn't "error", "unmodified" or so on
+				if len(expected) > 10 && expected != respError && expected != respEmpty && expected != respUnmodified && strings.Contains(body, expected) {
+					conclusion = "Subsequent was modified and " + expected + " rendered"
 					Print(conclusion+"\n", Green)
 					setTemplateEngine([]string{"Pug"})
 					return respIdentified, conclusion
@@ -804,7 +885,7 @@ func checkBodyIndicator(body string, polyglot string, reflection structs.Reflect
 		lowerbody := strings.ToLower(body)
 		if strings.Contains(lowerbody, "error") { // maybe use parseerror and syntaxerror instead
 			conclusion = "The polyglot " + polyglot + " triggered an error message, because it contained the word error"
-			if !backslashed {
+			if polytype == DEFAULT {
 				Print(conclusion+"\n", Green)
 			} else {
 				PrintVerbose("Backslashed: "+conclusion+"\n", Cyan, 2)
@@ -828,7 +909,7 @@ func checkBodyIndicator(body string, polyglot string, reflection structs.Reflect
 				possible := []string{}
 				for _, engine := range engines {
 					if engine.Name == "Scriban" || engine.Name == "Scriban (Liquid mode)" {
-						if engine.Polyglots[polyglot] == respError {
+						if engine.Polyglots[polyglot] == respError || polytype == VERIFYERROR {
 							possible = append(possible, engine.Name)
 						}
 					}
@@ -848,7 +929,7 @@ func checkBodyIndicator(body string, polyglot string, reflection structs.Reflect
 			// Generic Error Detection
 			if strings.Contains(strings.ToLower(stringBetween), "error") || strings.Contains(strings.ToLower(stringBetween), "exception") || strings.Contains(strings.ToLower(stringBetween), "unexpected") {
 				conclusion = "The polyglot " + polyglot + " triggered an error message, because the rendered response contained the word error, exception or unexpected"
-				if !backslashed {
+				if polytype == DEFAULT {
 					Print(conclusion+"\n", Yellow)
 				} else {
 					PrintVerbose("Backslashed: "+conclusion+"\n", Cyan, 2)
@@ -880,7 +961,7 @@ func checkBodyIndicator(body string, polyglot string, reflection structs.Reflect
 			printBetween = stringBetween
 		}
 		conclusion = "The polyglot " + polyglot + " was rendered in a modified way: [" + printBetween + "]" + addition
-		if !backslashed {
+		if polytype == DEFAULT {
 			Print(conclusion+"\n", Yellow)
 		} else {
 			PrintVerbose("Backslashed: "+conclusion+"\n", Cyan, 2)

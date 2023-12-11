@@ -8,7 +8,8 @@ import (
 
 var jsonlCmd = &cobra.Command{
 	Use:   "jsonl",
-	Short: "Scan using a JSONL file\n\nThe file has to have a JSON object with the following structure on each line:\n" + getStructure(),
+	Short: "Scan using a JSONL file",
+	Long:  getLogo() + "\n\nthe Template INJection Analyzer. (" + version + ")\n" + getCopyright() + "\n\nScan using a JSONL file. The file has to have a JSON object with the following structure on each line:\n" + getStructure(),
 	Run: func(cmd *cobra.Command, args []string) {
 		pkg.Scan(config, version, pkg.JSONL)
 	},
