@@ -14,6 +14,8 @@ type Config struct {
 	ProxyURL      string
 	ReportPath    string
 	UserAgent     string
+	RawPath       string
+	JSONLPath     string
 
 	Cookies        []string
 	Headers        []string
@@ -22,7 +24,9 @@ type Config struct {
 	URLsReflection []string
 	Crawls         []Crawl
 
-	UserAgentChrome bool
-	EscapeJSON      bool
-	CSTI            bool
+	UserAgentChrome     bool
+	EscapeJSON          bool
+	CSTI                bool
+	NoAdditionalHeaders bool
+	HTTP                bool
 }

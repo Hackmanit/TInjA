@@ -1,7 +1,7 @@
 package main
 
 import (
-	"example/user/tinja/cmd"
+	"github.com/Hackmanit/TInjA/cmd"
 )
 
 func main() {

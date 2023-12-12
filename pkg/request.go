@@ -26,7 +26,6 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"example/user/tinja/pkg/structs"
 	"fmt"
 	"io"
 	"net"
@@ -36,6 +35,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Hackmanit/TInjA/pkg/structs"
 )
 
 func buildRequest(u string, conf structs.Config) (req *http.Request, err error) {

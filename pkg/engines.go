@@ -24,7 +24,7 @@ This `engines.go` file provides a collection of template engines, their respecti
 
 ********/
 
-import "example/user/tinja/pkg/structs"
+import "github.com/Hackmanit/TInjA/pkg/structs"
 
 var engines []structs.Engine
 

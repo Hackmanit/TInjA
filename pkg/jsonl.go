@@ -9,8 +9,9 @@ The `ReadJSONL` function accepts a `jsonlPath` parameter, which is the path to t
 import (
 	"bufio"
 	"encoding/json"
-	"example/user/tinja/pkg/structs"
 	"os"
+
+	"github.com/Hackmanit/TInjA/pkg/structs"
 )
 
 // ReadJSONL reads a JSONL file and returns a slice of structs.Crawl.

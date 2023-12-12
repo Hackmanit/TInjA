@@ -15,10 +15,11 @@ These functions work together to analyze reflections in the response body and he
 ********/
 
 import (
-	"example/user/tinja/pkg/structs"
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/Hackmanit/TInjA/pkg/structs"
 )
 
 // TODO anstelle von DefaultReq ein neues Request stellen  mit Nonce und überprüfen, dass response bis auf anderen input gleich ist
@@ -97,7 +98,7 @@ func doReflectionCheckRequest(u string) string {
 }
 
 func addReflections(body string, token string, urlReflection string) {
-	for strings.Contains(body, token) { // loop through every occurance of token
+	for strings.Contains(body, token) { // loop through every occurrence of token
 		precedingSubsequent := strings.SplitN(body, token, 2)
 		preceding := precedingSubsequent[0]
 		subsequent := precedingSubsequent[1]

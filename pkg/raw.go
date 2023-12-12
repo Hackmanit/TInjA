@@ -2,9 +2,10 @@ package pkg
 
 import (
 	"bufio"
-	"example/user/tinja/pkg/structs"
 	"os"
 	"strings"
+
+	"github.com/Hackmanit/TInjA/pkg/structs"
 )
 
 func ReadRaw(rawPath string, httpP bool) []structs.Crawl {
@@ -48,7 +49,7 @@ func ReadRaw(rawPath string, httpP bool) []structs.Crawl {
 		}
 		index++
 	}
-	if httpP {
+	if config.HTTP {
 		crawl.Request.Endpoint = "http://" + host + path
 	} else {
 		crawl.Request.Endpoint = "https://" + host + path
