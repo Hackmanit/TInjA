@@ -24,8 +24,8 @@ import (
 	"os"
 	"strings"
 
-	"example/user/tinja/pkg"
-	"example/user/tinja/pkg/structs"
+	"github.com/Hackmanit/TInjA/pkg"
+	"github.com/Hackmanit/TInjA/pkg/structs"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"

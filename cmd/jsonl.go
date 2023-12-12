@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"example/user/tinja/pkg"
+	"github.com/Hackmanit/TInjA/pkg"
 
 	"github.com/spf13/cobra"
 )

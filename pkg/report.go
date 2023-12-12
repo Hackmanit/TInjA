@@ -14,9 +14,10 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"example/user/tinja/pkg/structs"
 	"fmt"
 	"os"
+
+	"github.com/Hackmanit/TInjA/pkg/structs"
 )
 
 var certaintyVeryHigh = "Very High"

@@ -41,7 +41,6 @@ These methods work together to perform the template injection vulnerability anal
 import (
 	"bytes"
 	"errors"
-	"example/user/tinja/pkg/structs"
 	"fmt"
 	"html"
 	"io"
@@ -52,6 +51,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Hackmanit/TInjA/pkg/structs"
 
 	"github.com/go-rod/rod"
 	"moul.io/http2curl"

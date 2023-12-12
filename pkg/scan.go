@@ -21,7 +21,6 @@ Additionally, the file includes variable declarations, including global variable
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"example/user/tinja/pkg/structs"
 	"fmt"
 	"math"
 	"net/http"
@@ -32,6 +31,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Hackmanit/TInjA/pkg/structs"
 
 	"golang.org/x/net/http2"
 	"golang.org/x/time/rate"

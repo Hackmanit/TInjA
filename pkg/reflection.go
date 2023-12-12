@@ -15,10 +15,11 @@ These functions work together to analyze reflections in the response body and he
 ********/
 
 import (
-	"example/user/tinja/pkg/structs"
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/Hackmanit/TInjA/pkg/structs"
 )
 
 // TODO anstelle von DefaultReq ein neues Request stellen  mit Nonce und überprüfen, dass response bis auf anderen input gleich ist

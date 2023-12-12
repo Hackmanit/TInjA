@@ -1,4 +1,4 @@
-module example/user/tinja
+module github.com/Hackmanit/TInjA
 
 go 1.21
 
