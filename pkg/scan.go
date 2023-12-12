@@ -45,6 +45,7 @@ var (
 	defaultStatus            int
 	report                   Report
 	config                   structs.Config
+	findings                 structs.Findings
 	postParams               map[string]string
 	limiter                  *rate.Limiter
 	caCertPool               *x509.CertPool
@@ -155,15 +156,25 @@ func Scan(configParam structs.Config, version string, typ int) {
 	msg = "Successfully finished the scan\n"
 	PrintVerbose(msg, NoColor, 1)
 
+	findings.TotalInjections = findings.VeryHigh + findings.High + findings.Medium + findings.Low + findings.VeryLow
 	if boolReport {
-		PrintVerbose("Suspected vulnerable URLs: "+strconv.Itoa(report.SuspectedInjections)+"\n", Green, 1)
-		PrintVerbose("Suspected template injections: "+strconv.Itoa(report.SuspectedInjections)+"\n", Green, 1)
-		msg = fmt.Sprintf("%d Very High, %d High, %d Medium, %d Low, %d Very Low certainty\n\n", report.VeryHigh, report.High, report.Medium, report.Low, report.VeryLow)
-		PrintVerbose(msg, Green, 1)
+		Print("Suspected vulnerable URLs: "+strconv.Itoa(report.SuspectedVulnerableURLs)+"\n", Green)
+
+		report.VeryHigh = findings.VeryHigh
+		report.High = findings.High
+		report.Medium = findings.Medium
+		report.Low = findings.Low
+		report.VeryLow = findings.VeryLow
+		report.SuspectedInjections = findings.TotalInjections
 	}
+
+	Print("Suspected template injections: "+strconv.Itoa(findings.TotalInjections)+"\n", Green)
+	msg = fmt.Sprintf("%d Very High, %d High, %d Medium, %d Low, %d Very Low certainty\n\n", findings.VeryHigh, findings.High, findings.Medium, findings.Low, findings.VeryLow)
+	Print(msg, Green)
+
 	duration := time.Since(start)
 	msg = fmt.Sprintf("Duration: %s\n", duration)
-	PrintVerbose(msg, NoColor, 1)
+	Print(msg, NoColor)
 	averagePolyglots := float64(CounterPolyglotsGlobal) / float64(userInputCounter)
 	Print(fmt.Sprint("Average polyglots sent per user input: ", averagePolyglots, "\n\n"), NoColor)
 	/****************/
@@ -313,27 +324,17 @@ func scanURL(u string, crawl structs.Crawl, typ int) ReportWebpage {
 			// only add repParam to the report, if the param is vulnerable or if there are error messages or if there are reflections
 			if repParam.IsVulnerable || len(repParam.ErrorMessages) > 0 || len(repParam.Reflections) > 0 || requestError {
 				repWebpage.Parameters = append(repWebpage.Parameters, repParam)
-				switch repParam.Certainty {
-				case certaintyVeryHigh:
+				// get the highest certainty across all findings for a single url
+				if repParam.Certainty == certaintyVeryHigh {
 					repWebpage.Certainty = certaintyVeryHigh
-					report.VeryHigh += 1
-					report.SuspectedInjections += 1
-				case certaintyHigh:
+				} else if repParam.Certainty == certaintyHigh && repWebpage.Certainty != certaintyVeryHigh {
 					repWebpage.Certainty = certaintyHigh
-					report.High += 1
-					report.SuspectedInjections += 1
-				case certaintyMedium:
+				} else if repParam.Certainty == certaintyMedium && repWebpage.Certainty != certaintyVeryHigh && repWebpage.Certainty != certaintyHigh {
 					repWebpage.Certainty = certaintyMedium
-					report.Medium += 1
-					report.SuspectedInjections += 1
-				case certaintyLow:
+				} else if repParam.Certainty == certaintyLow && repWebpage.Certainty != certaintyVeryHigh && repWebpage.Certainty != certaintyHigh && repWebpage.Certainty != certaintyMedium {
 					repWebpage.Certainty = certaintyLow
-					report.Low += 1
-					report.SuspectedInjections += 1
-				case certaintyVeryLow:
+				} else if repParam.Certainty == certaintyVeryLow && repWebpage.Certainty != certaintyVeryHigh && repWebpage.Certainty != certaintyHigh && repWebpage.Certainty != certaintyMedium && repWebpage.Certainty != certaintyLow {
 					repWebpage.Certainty = certaintyVeryLow
-					report.VeryLow += 1
-					report.SuspectedInjections += 1
 				}
 			}
 			if statusCodeChanged {
@@ -367,27 +368,17 @@ func scanURL(u string, crawl structs.Crawl, typ int) ReportWebpage {
 				// only add repParam to the report, if the param is vulnerable or if there are error messages or if there are reflections
 				if repParam.IsVulnerable || len(repParam.ErrorMessages) > 0 || len(repParam.Reflections) > 0 || requestError {
 					repWebpage.Parameters = append(repWebpage.Parameters, repParam)
-					switch repParam.Certainty {
-					case certaintyVeryHigh:
+					// get the highest certainty across all findings for a single url
+					if repParam.Certainty == certaintyVeryHigh {
 						repWebpage.Certainty = certaintyVeryHigh
-						report.VeryHigh += 1
-						report.SuspectedInjections += 1
-					case certaintyHigh:
+					} else if repParam.Certainty == certaintyHigh && repWebpage.Certainty != certaintyVeryHigh {
 						repWebpage.Certainty = certaintyHigh
-						report.High += 1
-						report.SuspectedInjections += 1
-					case certaintyMedium:
+					} else if repParam.Certainty == certaintyMedium && repWebpage.Certainty != certaintyVeryHigh && repWebpage.Certainty != certaintyHigh {
 						repWebpage.Certainty = certaintyMedium
-						report.Medium += 1
-						report.SuspectedInjections += 1
-					case certaintyLow:
+					} else if repParam.Certainty == certaintyLow && repWebpage.Certainty != certaintyVeryHigh && repWebpage.Certainty != certaintyHigh && repWebpage.Certainty != certaintyMedium {
 						repWebpage.Certainty = certaintyLow
-						report.Low += 1
-						report.SuspectedInjections += 1
-					case certaintyVeryLow:
+					} else if repParam.Certainty == certaintyVeryLow && repWebpage.Certainty != certaintyVeryHigh && repWebpage.Certainty != certaintyHigh && repWebpage.Certainty != certaintyMedium && repWebpage.Certainty != certaintyLow {
 						repWebpage.Certainty = certaintyVeryLow
-						report.VeryLow += 1
-						report.SuspectedInjections += 1
 					}
 				}
 				if statusCodeChanged {
@@ -434,27 +425,17 @@ func scanURL(u string, crawl structs.Crawl, typ int) ReportWebpage {
 				// only add repParam to the report, if the param is vulnerable or if there are error messages or if there are reflections
 				if repParam.IsVulnerable || len(repParam.ErrorMessages) > 0 || len(repParam.Reflections) > 0 || requestError {
 					repWebpage.Parameters = append(repWebpage.Parameters, repParam)
-					switch repParam.Certainty {
-					case certaintyVeryHigh:
+					// get the highest certainty across all findings for a single url
+					if repParam.Certainty == certaintyVeryHigh {
 						repWebpage.Certainty = certaintyVeryHigh
-						report.VeryHigh += 1
-						report.SuspectedInjections += 1
-					case certaintyHigh:
+					} else if repParam.Certainty == certaintyHigh && repWebpage.Certainty != certaintyVeryHigh {
 						repWebpage.Certainty = certaintyHigh
-						report.High += 1
-						report.SuspectedInjections += 1
-					case certaintyMedium:
+					} else if repParam.Certainty == certaintyMedium && repWebpage.Certainty != certaintyVeryHigh && repWebpage.Certainty != certaintyHigh {
 						repWebpage.Certainty = certaintyMedium
-						report.Medium += 1
-						report.SuspectedInjections += 1
-					case certaintyLow:
+					} else if repParam.Certainty == certaintyLow && repWebpage.Certainty != certaintyVeryHigh && repWebpage.Certainty != certaintyHigh && repWebpage.Certainty != certaintyMedium {
 						repWebpage.Certainty = certaintyLow
-						report.Low += 1
-						report.SuspectedInjections += 1
-					case certaintyVeryLow:
+					} else if repParam.Certainty == certaintyVeryLow && repWebpage.Certainty != certaintyVeryHigh && repWebpage.Certainty != certaintyHigh && repWebpage.Certainty != certaintyMedium && repWebpage.Certainty != certaintyLow {
 						repWebpage.Certainty = certaintyVeryLow
-						report.VeryLow += 1
-						report.SuspectedInjections += 1
 					}
 				}
 				if statusCodeChanged {
@@ -474,6 +455,9 @@ func scanURL(u string, crawl structs.Crawl, typ int) ReportWebpage {
 			repWebpage.ReportDefault.Response = responseDump
 		}
 		repWebpage.ReportDefault.StatusCode = defaultStatus
+		if repWebpage.IsVulnerable {
+			findings.VulnerableURLs++
+		}
 	}
 
 	return repWebpage
