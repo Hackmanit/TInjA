@@ -33,6 +33,7 @@ TInjA was developed by [Hackmanit](https://hackmanit.de) and [Maximilian Hildebr
 - Efficient scanning thanks to the usage of polyglots:
     - On average only five polyglots are sent to the web page until the template injection possibility is detected and the template engine identified.
 - Pass crawled URLs to TInjA in JSONL format.
+- Pass a raw HTTP request to TInjA.
 - Set custom headers, cookies, POST parameters, and query parameters.
 - Route the traffic through a proxy (e.g., Burp Suite).
 - Configure Ratelimiting.
@@ -95,7 +96,7 @@ TInjA was developed by [Hackmanit](https://hackmanit.de) and [Maximilian Hildebr
 ### Option 1: Prebuilt Binary
 Prebuilt binaries of TInjA are provided on the [releases page](https://github.com/Hackmanit/TInjA/releases).
 ### Option 2: Install Using Go
-Requirements: go1.18 or higher
+Requirements: go1.21 or higher
 ```bash
 go install -v github.com/Hackmanit/TInjA@latest
 ```
@@ -104,6 +105,7 @@ go install -v github.com/Hackmanit/TInjA@latest
 - Scan a single URL: `tinja url -u "http://example.com/"`
 - Scan multiple URLs: `tinja url -u "http://example.com/" -u "http://example.com/path2"`
 - Scan URLs provided in a file: `tinja url -u "file:/path/to/file"`
+- Scan a single URL by passing a file with a raw HTTP request: `tinja raw -R "/path/to/file"`
 - Scan URLs with additional information provided in a JSONL file: `tinja jsonl -j "/path/to/file"`
     - Each line of the JSONL file must contain a single JSON object. The whole JSON object must be in one line. Each object must have the following structure *(extra line breaks and indentation are for display purposes only)*:
 ```json
