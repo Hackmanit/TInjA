@@ -49,7 +49,7 @@ func ReadRaw(rawPath string, httpP bool) []structs.Crawl {
 		}
 		index++
 	}
-	if httpP {
+	if config.HTTP {
 		crawl.Request.Endpoint = "http://" + host + path
 	} else {
 		crawl.Request.Endpoint = "https://" + host + path

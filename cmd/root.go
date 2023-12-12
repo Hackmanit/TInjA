@@ -46,7 +46,7 @@ var ( // commandline flags
 	cfgFile, data, reportPath, proxyCertPath, proxyURL, jsonlPath, rawPath string
 	cookies, headers, parameters, urls, urlsReflection                     []string
 	config                                                                 structs.Config
-	uac, csti, escapeJSON, httpP                                           bool
+	uac, csti, escapeJSON, httpP, noAdditionalHeaders                      bool
 )
 
 var rootCmd = &cobra.Command{
@@ -88,8 +88,9 @@ func init() {
 	rootCmd.PersistentFlags().StringSliceVarP(&cookies, "cookie", "c", []string{}, "add custom cookie(s)")
 
 	rootCmd.PersistentFlags().BoolVar(&uac, "useragentchrome", false, "set chrome as user-agent. Default user-agent is '"+useragent+"'")
-	rootCmd.PersistentFlags().BoolVar(&csti, "csti", false, "Enable scanning for Client-Side Template Injections using a headless browser")
-	rootCmd.PersistentFlags().BoolVar(&escapeJSON, "escapereport", false, "Escape HTML special chars in the JSON report")
+	rootCmd.PersistentFlags().BoolVar(&csti, "csti", false, "enable scanning for Client-Side Template Injections using a headless browser")
+	rootCmd.PersistentFlags().BoolVar(&escapeJSON, "escapereport", false, "escape HTML special chars in the JSON report")
+	rootCmd.PersistentFlags().BoolVarP(&noAdditionalHeaders, "noadditionalheaders", "n", false, "do not automatically test additional headers such as X-Forwarded-For")
 }
 
 func initConfig() {
@@ -180,18 +181,19 @@ func initConfig() {
 
 	config = structs.Config{
 		// Root
-		Timeout:          timeout,
-		Ratelimit:        ratelimit,
-		Verbosity:        verbosity,
-		PrecedingLength:  precedingLength,
-		SubsequentLength: subsequentLength,
-		ReportPath:       reportPath,
-		UserAgentChrome:  uac,
-		ProxyCertPath:    proxyCertPath,
-		ProxyURL:         proxyURL,
-		CSTI:             csti,
-		EscapeJSON:       escapeJSON,
-		UserAgent:        useragent,
+		Timeout:             timeout,
+		Ratelimit:           ratelimit,
+		Verbosity:           verbosity,
+		PrecedingLength:     precedingLength,
+		SubsequentLength:    subsequentLength,
+		ReportPath:          reportPath,
+		UserAgentChrome:     uac,
+		ProxyCertPath:       proxyCertPath,
+		ProxyURL:            proxyURL,
+		CSTI:                csti,
+		EscapeJSON:          escapeJSON,
+		UserAgent:           useragent,
+		NoAdditionalHeaders: noAdditionalHeaders,
 		// URL Command
 		Data:           data,
 		Cookies:        cookies,
@@ -200,8 +202,13 @@ func initConfig() {
 		URLs:           urls,
 		URLsReflection: urlsReflection,
 		LengthLimit:    lengthLimit,
-		// JSONL Command
+		// JSONL + RAW Command
 		Crawls: crawls,
+		// RAW Command
+		HTTP:    httpP,
+		RawPath: rawPath,
+		// JSONL Command
+		JSONLPath: jsonlPath,
 	}
 }
 
