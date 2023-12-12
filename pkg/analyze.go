@@ -62,7 +62,7 @@ import (
 var errorShown bool
 var reflected bool
 var onlyErrorResponses bool
-var recievedModifiedRenderedResponse bool
+var receivedModifiedRenderedResponse bool
 var reflections []structs.Reflection
 var polyglotMap map[string]string
 var notTested = "notTested"
@@ -132,19 +132,24 @@ func analyze(name string, typ int, u string) (reportParameter, bool) {
 
 	certainty := "None"
 	if detected {
-		if repParam.TemplateEngine == "unknown" && !recievedModifiedRenderedResponse {
+		if repParam.TemplateEngine == "unknown" && !receivedModifiedRenderedResponse {
 			certainty = certaintyVeryLow
-		} else if repParam.TemplateEngine == "unknown" && recievedModifiedRenderedResponse {
+			findings.VeryLow++
+		} else if repParam.TemplateEngine == "unknown" && receivedModifiedRenderedResponse {
 			certainty = certaintyLow
-		} else if !recievedModifiedRenderedResponse {
+			findings.Low++
+		} else if !receivedModifiedRenderedResponse {
 			// The host header has great limitations which characters are allowed and which not. This often leads to false positives for template engines which often responds with unmodified or error, like dot
 			if typ == HEADER && strings.EqualFold(name, "host") {
 				certainty = certaintyMedium
+				findings.Medium++
 			} else {
 				certainty = certaintyHigh
+				findings.High++
 			}
-		} else if recievedModifiedRenderedResponse {
+		} else if receivedModifiedRenderedResponse {
 			certainty = certaintyVeryHigh
+			findings.VeryHigh++
 		}
 	}
 
@@ -176,7 +181,7 @@ func resetEverything() {
 	errorShown = true
 	// set onlyErrorResponses = false if a response is no error response
 	onlyErrorResponses = true
-	recievedModifiedRenderedResponse = false
+	receivedModifiedRenderedResponse = false
 	reflected = false
 	statusCodeChanged = false
 
@@ -244,7 +249,7 @@ func detectTemplateInjection(name string, typ int, u string) (bool, []reportRequ
 	// Check if one of the three universal non error polyglots is processed - if input is reflected
 	for _, polyglot := range []string{nonerr1, nonerr2, nonerr3} {
 		// return if engine was already identified. But continue if input is being reflected and no definitive rendered response was received yet (to diminish false positives)
-		if getIdentifiedEngine() != "" && getIdentifiedEngine() != "unkown" && (!reflected || (reflected && recievedModifiedRenderedResponse)) {
+		if getIdentifiedEngine() != "" && getIdentifiedEngine() != "unknown" && (!reflected || (reflected && receivedModifiedRenderedResponse)) {
 			return true, repRequests
 		}
 		if respCode, repRequest = sendPolyglot(name, typ, polyglot, u, DEFAULT); respCode != indicatorNone && respCode != indicatorUnmodified && respCode != indicatorNotValid {
@@ -260,7 +265,7 @@ func detectTemplateInjection(name string, typ int, u string) (bool, []reportRequ
 	// Hence try more polyglots if needed.
 	if typ == HEADER && strings.EqualFold(name, "host") && !success {
 		// return if engine was already identified
-		if getIdentifiedEngine() != "" && getIdentifiedEngine() != "unkown" && (!reflected || (reflected && recievedModifiedRenderedResponse)) {
+		if getIdentifiedEngine() != "" && getIdentifiedEngine() != "unknown" && (!reflected || (reflected && receivedModifiedRenderedResponse)) {
 			return true, repRequests
 		}
 		for polyglot := range polyglotMap {
@@ -287,7 +292,7 @@ func identifyTemplateEngine(name string, typ int, u string) (string, []reportReq
 	var repRequest reportRequest
 	var err error
 	// If Engine was already identified during detection phase, return its name
-	if getIdentifiedEngine() != "" && getIdentifiedEngine() != "unkown" && (!reflected || (reflected && recievedModifiedRenderedResponse)) && !onlyErrorResponses {
+	if getIdentifiedEngine() != "" && getIdentifiedEngine() != "unknown" && (!reflected || (reflected && receivedModifiedRenderedResponse)) && !onlyErrorResponses {
 		return getIdentifiedEngine(), nil, err
 	}
 	Print("\nA template injection was detected and the template engine is now being identified.\n", NoColor)
@@ -305,10 +310,10 @@ func identifyTemplateEngine(name string, typ int, u string) (string, []reportReq
 		switch engine := getIdentifiedEngine(); engine {
 		case "":
 			continue
-		case "unkown":
+		case "unknown":
 			return "unknown", repRequests, err
 		default:
-			if !onlyErrorResponses && (!reflected || (reflected && recievedModifiedRenderedResponse)) {
+			if !onlyErrorResponses && (!reflected || (reflected && receivedModifiedRenderedResponse)) {
 				return engine, repRequests, err
 			} else {
 				continue
@@ -434,7 +439,7 @@ func sendPolyglot(name string, typ int, polyglot string, u string, polytype int)
 		}
 	}
 	if respIndicator == indicatorIdentified {
-		recievedModifiedRenderedResponse = true
+		receivedModifiedRenderedResponse = true
 	}
 	if respIndicator != indicatorError && respIndicator != indicatorNotValid && polytype == DEFAULT {
 		onlyErrorResponses = false
@@ -676,10 +681,10 @@ func checkResponses(polyglot string, responses []string, polytype int) int {
 
 // returns empty string, if more than 1 engine is possible, returns unknown if no known engine is possible
 func getIdentifiedEngine() string {
-	identifiedEngine := "unkown"
+	identifiedEngine := "unknown"
 	for engine, possible := range possibleEngines {
 		if possible {
-			if identifiedEngine == "unkown" {
+			if identifiedEngine == "unknown" {
 				identifiedEngine = engine
 			} else {
 				return ""
@@ -972,10 +977,10 @@ func checkBodyIndicator(body string, polyglot string, reflection structs.Reflect
 }
 
 func checkForDistinctTemplateEngineResponse(polyglot string, stringBetween string) {
-	if !recievedModifiedRenderedResponse && reflected && stringBetween != respError && stringBetween != respEmpty && stringBetween != respUnmodified && stringBetween != respContinue {
+	if !receivedModifiedRenderedResponse && reflected && stringBetween != respError && stringBetween != respEmpty && stringBetween != respUnmodified && stringBetween != respContinue {
 		for _, engine := range engines {
 			if engine.Polyglots[polyglot] == stringBetween {
-				recievedModifiedRenderedResponse = true
+				receivedModifiedRenderedResponse = true
 			}
 		}
 	}

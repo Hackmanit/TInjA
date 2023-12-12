@@ -98,7 +98,7 @@ func doReflectionCheckRequest(u string) string {
 }
 
 func addReflections(body string, token string, urlReflection string) {
-	for strings.Contains(body, token) { // loop through every occurance of token
+	for strings.Contains(body, token) { // loop through every occurrence of token
 		precedingSubsequent := strings.SplitN(body, token, 2)
 		preceding := precedingSubsequent[0]
 		subsequent := precedingSubsequent[1]
