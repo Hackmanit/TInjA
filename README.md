@@ -173,7 +173,7 @@ A blog post providing more information about template injection and [TInjA – t
 
 [Soon to be released](https://www.hackmanit.de/en/blog-en/)
 
-The Template Injection Playground was developed as a part of a master's thesis by Maximilian Hildebrand.
+TInjA was developed as a part of a master's thesis by Maximilian Hildebrand.
 You can find results of the master's thesis publicly available here:
 - [Template Injection Table](https://github.com/Hackmanit/template-injection-table)
 - [Template Injection Playground](https://github.com/Hackmanit/template-injection-playground)

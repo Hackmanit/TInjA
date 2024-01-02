@@ -28,7 +28,7 @@ The `analyze.go` file contains a package called `pkg` that provides functionalit
 
 - `checkBodyIndicator(body string, polyglot string, reflection structs.Reflection) (string, string)`: This method checks for indicators in the response body. It takes in the body, polyglot, and a `Reflection` struct representing the reflection point. It handles specific cases for different template engines and returns the response and conclusion based on the indicators found.
 
-- `checkForDistinctTemplateEngineResponse(polyglot string, stringBetween string)`: This method checks if the recieved response was definitely rendered by a template engine. This is the case, if stringBetween matches with an expected response of at least one template engine.
+- `checkForDistinctTemplateEngineResponse(polyglot string, stringBetween string)`: This method checks if the received response was definitely rendered by a template engine. This is the case, if stringBetween matches with an expected response of at least one template engine.
 
 - `setTemplateEngine(names []string)`: This method sets the possible template engines based on the identified engine names. It takes in a slice of engine names as a parameter.
 

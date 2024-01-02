@@ -227,6 +227,7 @@ func bindFlags(cmd *cobra.Command) {
 }
 
 func getLogo() (logo string) {
+	// source: https://patorjk.com/software/taag/#p=display&f=Slant%20Relief&t=TInjA
 	logo = `
 __/\\\\\\\\\\\\\\\__/\\\\\\\\\\\______________________________/\\\\\\\\\____        
  _\///////\\\/////__\/////\\\///______________________/\\\___/\\\\\\\\\\\\\__       
