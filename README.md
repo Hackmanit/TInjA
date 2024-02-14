@@ -171,7 +171,7 @@ To scan HTTPS URLs using a proxy a CA certificate of the proxy in PEM format is 
 ## Background Information
 A blog post providing more information about template injection and [TInjA – the Template INJection Analyzer](https://github.com/Hackmanit/TInjA) can be found here:
 
-[Soon to be released](https://www.hackmanit.de/en/blog-en/)
+[Template Injection Vulnerabilities – Understand, Detect, Identify](https://hackmanit.de/en/blog-en/178-template-injection-vulnerabilities-understand-detect-identify)
 
 TInjA was developed as a part of a master's thesis by Maximilian Hildebrand.
 You can find results of the master's thesis publicly available here:
