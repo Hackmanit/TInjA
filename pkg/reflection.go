@@ -89,10 +89,14 @@ func analyzeReflection(name string, typ int, u string) (bool, error) {
 func doReflectionCheckRequest(u string) string {
 	config.Data = ""
 	config.Parameters = []string{}
-	req, _ := buildRequest(u, config)
+	req, err := buildRequest(u, config)
+	if err != nil {
+		PrintVerbose("Error: doReflectionRequest: buildRequest:"+err.Error()+"\n", Yellow, 1)
+		return ""
+	}
 	body, _, _, _, err := doRequest(req)
 	if err != nil {
-		PrintVerbose("Error: doReflectionRequest: "+err.Error()+"\n", Yellow, 1)
+		PrintVerbose("Error: doReflectionRequest: doRequest:"+err.Error()+"\n", Yellow, 1)
 	}
 	return body
 }

@@ -276,7 +276,7 @@ func scanURL(u string, crawl structs.Crawl, typ int) ReportWebpage {
 
 	msg = "Sending default request\n"
 	PrintVerbose(msg, NoColor, 2)
-	reqDefault, _ := buildRequest(u, config)
+	reqDefault, err := buildRequest(u, config)
 	if err != nil {
 		msg := "Error: ScanURL: buildRequest: " + err.Error()
 		Print(msg+"\n", Red)

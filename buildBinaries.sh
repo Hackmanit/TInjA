@@ -1,5 +1,8 @@
 #!/bin/bash
-version=1.0.5
+version=1.1.1
+
+mkdir build/
+rm build/*
 
 # Windows amd64
 goos=windows
@@ -28,18 +31,6 @@ tar cfvz build/TInjA_"$version"_"$goos"_"$goarch".tar.gz tinja
 # Darwin/MacOS arm64
 goos=darwin
 goarch=arm64
-GOOS=$goos GOARCH=$goarch go build -o tinja
-tar cfvz build/TInjA_"$version"_"$goos"_"$goarch".tar.gz tinja
-
-# FreeBSD amd64
-goos=freebsd
-goarch=amd64
-GOOS=$goos GOARCH=$goarch go build -o tinja
-tar cfvz build/TInjA_"$version"_"$goos"_"$goarch".tar.gz tinja
-
-# OpenBSD amd64
-goos=openbsd
-goarch=amd64
 GOOS=$goos GOARCH=$goarch go build -o tinja
 tar cfvz build/TInjA_"$version"_"$goos"_"$goarch".tar.gz tinja
 

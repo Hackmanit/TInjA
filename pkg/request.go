@@ -44,14 +44,14 @@ func buildRequest(u string, conf structs.Config) (req *http.Request, err error) 
 	if conf.Data != "" {
 		req, err = http.NewRequest("POST", u, bytes.NewBufferString(conf.Data))
 		if err != nil {
-			Print("buildRequest: "+err.Error()+"\n", Red)
+			Print("buildRequest: NewRequest: "+err.Error()+"\n", Red)
 			return
 		}
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	} else {
 		req, err = http.NewRequest(http.MethodGet, u, nil)
 		if err != nil {
-			Print("buildRequest: "+err.Error()+"\n", Red)
+			Print("buildRequest: NewRequest: "+err.Error()+"\n", Red)
 			return
 		}
 	}
