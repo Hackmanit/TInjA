@@ -344,6 +344,7 @@ func scanURL(u string, crawl structs.Crawl, typ int) ReportWebpage {
 		}
 	}
 
+	// test parameters
 	if !statusCodeChanged {
 		postParams = getPostParams()
 		msg = fmt.Sprintf("Found %d post parameters\n", len(postParams))
@@ -389,8 +390,9 @@ func scanURL(u string, crawl structs.Crawl, typ int) ReportWebpage {
 		}
 	}
 
-	if !statusCodeChanged {
-		headerMap := reqDefault.Header
+	// test headers
+	if !statusCodeChanged && len(config.TestHeaders) > 0 {
+		/*headerMap := reqDefault.Header
 		// Remove headers which are *very* unlikely embedded into a template
 		headerMap.Del("Content-Type")
 		headerMap.Del("User-Agent")
@@ -402,8 +404,21 @@ func scanURL(u string, crawl structs.Crawl, typ int) ReportWebpage {
 		}
 		if headerMap["Origin"] == nil {
 			headerMap["Origin"] = []string{"added-by-TInjA"}
+		}*/
+		headerMap := make(http.Header)
+		for _, header := range config.TestHeaders {
+			var value string
+			if header == "Host" {
+				value = reqDefault.Host
+			} else {
+				value = reqDefault.Header.Get(header)
+			}
+			if value == "" {
+				value = "added-by-TInjA"
+			}
+			headerMap[header] = []string{value}
 		}
-		msg = fmt.Sprintf("Found %d headers\n", len(headerMap))
+		msg = fmt.Sprintf("Testing %d headers\n", len(headerMap))
 		PrintVerbose(msg, NoColor, 2)
 		for k, v := range headerMap {
 			msg = fmt.Sprintln("Analyzing header ", k, " => ", v)

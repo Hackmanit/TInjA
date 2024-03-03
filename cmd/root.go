@@ -44,9 +44,9 @@ var ( // commandline flags
 	timeout, verbosity, precedingLength, subsequentLength, lengthLimit     int
 	ratelimit                                                              float64
 	cfgFile, data, reportPath, proxyCertPath, proxyURL, jsonlPath, rawPath string
-	cookies, headers, parameters, urls, urlsReflection                     []string
+	cookies, headers, parameters, urls, urlsReflection, testheaders        []string
 	config                                                                 structs.Config
-	uac, csti, escapeJSON, httpP, noAdditionalHeaders                      bool
+	uac, csti, escapeJSON, httpP                                           bool
 )
 
 var rootCmd = &cobra.Command{
@@ -90,7 +90,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&uac, "useragentchrome", false, "set chrome as user-agent. Default user-agent is '"+useragent+"'")
 	rootCmd.PersistentFlags().BoolVar(&csti, "csti", false, "enable scanning for Client-Side Template Injections using a headless browser")
 	rootCmd.PersistentFlags().BoolVar(&escapeJSON, "escapereport", false, "escape HTML special chars in the JSON report")
-	rootCmd.PersistentFlags().BoolVarP(&noAdditionalHeaders, "noadditionalheaders", "n", false, "do not automatically test additional headers such as X-Forwarded-For")
+	rootCmd.PersistentFlags().StringSliceVar(&testheaders, "testheaders", []string{}, "headers to test. E.g. --testheaders Host,Origin,X-Forwarded-For")
 }
 
 func initConfig() {
@@ -181,19 +181,19 @@ func initConfig() {
 
 	config = structs.Config{
 		// Root
-		Timeout:             timeout,
-		Ratelimit:           ratelimit,
-		Verbosity:           verbosity,
-		PrecedingLength:     precedingLength,
-		SubsequentLength:    subsequentLength,
-		ReportPath:          reportPath,
-		UserAgentChrome:     uac,
-		ProxyCertPath:       proxyCertPath,
-		ProxyURL:            proxyURL,
-		CSTI:                csti,
-		EscapeJSON:          escapeJSON,
-		UserAgent:           useragent,
-		NoAdditionalHeaders: noAdditionalHeaders,
+		Timeout:          timeout,
+		Ratelimit:        ratelimit,
+		Verbosity:        verbosity,
+		PrecedingLength:  precedingLength,
+		SubsequentLength: subsequentLength,
+		ReportPath:       reportPath,
+		UserAgentChrome:  uac,
+		ProxyCertPath:    proxyCertPath,
+		ProxyURL:         proxyURL,
+		CSTI:             csti,
+		EscapeJSON:       escapeJSON,
+		UserAgent:        useragent,
+		TestHeaders:      testheaders,
 		// URL Command
 		Data:           data,
 		Cookies:        cookies,

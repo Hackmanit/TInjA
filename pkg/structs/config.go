@@ -22,11 +22,11 @@ type Config struct {
 	Parameters     []string
 	URLs           []string
 	URLsReflection []string
+	TestHeaders    []string
 	Crawls         []Crawl
 
-	UserAgentChrome     bool
-	EscapeJSON          bool
-	CSTI                bool
-	NoAdditionalHeaders bool
-	HTTP                bool
+	UserAgentChrome bool
+	EscapeJSON      bool
+	CSTI            bool
+	HTTP            bool
 }
