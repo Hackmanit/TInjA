@@ -19,7 +19,7 @@ func init() {
 	rootCmd.AddCommand(rawCmd)
 
 	rawCmd.PersistentFlags().StringVarP(&rawPath, "raw", "R", "", "Raw file with crawl results")
-	rawCmd.PersistentFlags().BoolVarP(&httpP, "http", "", false, "Send HTTP Protoco")
+	rawCmd.PersistentFlags().BoolVar(&httpP, "http", false, "Send HTTP Protocol")
 	rawCmd.MarkPersistentFlagRequired("raw")
 }
 
