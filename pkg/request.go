@@ -325,7 +325,6 @@ func doRequest(req *http.Request) (body string, headers http.Header, status int,
 			dumpBytes, _ = httputil.DumpResponse(resp, false)
 		}
 		dump = string(dumpBytes)
-		dumpBytes = nil
 	}
 
 	// Read Response
@@ -341,7 +340,6 @@ func doRequest(req *http.Request) (body string, headers http.Header, status int,
 	}
 
 	body = string(resBody)
-	resBody = nil
 	headers = resp.Header
 	status = resp.StatusCode
 
