@@ -122,10 +122,10 @@ func setPost(req *http.Request, key string, payload string) (*http.Request, erro
 		if k == key {
 			bodyString += url.QueryEscape(payload)
 		} else {
-			bodyString += v + "?"
+			bodyString += v + "&"
 		}
 	}
-	bodyString = strings.TrimSuffix(bodyString, "?")
+	bodyString = strings.TrimSuffix(bodyString, "&")
 	conf.Data = bodyString
 	return buildRequest(req.URL.String(), conf)
 }
