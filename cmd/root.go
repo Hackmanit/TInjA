@@ -34,7 +34,7 @@ import (
 )
 
 var (
-	version   = "v1.1.3"
+	version   = "v1.1.4"
 	envPrefix = "TINJA"
 	useragent = "TInjA " + version
 	uaChrome  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36"

@@ -1,5 +1,5 @@
 #!/bin/bash
-version=1.1.3
+version=1.1.4
 
 mkdir build/
 rm build/*
