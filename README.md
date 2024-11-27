@@ -162,7 +162,7 @@ To scan HTTPS URLs using a proxy a CA certificate of the proxy in PEM format is 
 
 ## TODOs
 - `TINJA` marker to mark where the polyglots shall be placed.
-- Support for multipart bodies.
+- Support for multipart bodies and JSON.
 - Optional: Blind SSTI Payloads (e.g., sleep payloads).
 - Feedback, whether CSTI or SSTI was detected.
 - Check headless browser's console for template engine error messages (see https://github.com/go-rod/rod/issues/330).
