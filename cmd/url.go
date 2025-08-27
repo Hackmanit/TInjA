@@ -21,7 +21,6 @@ func init() {
 	urlCmd.PersistentFlags().StringVarP(&data, "data", "d", "", "add data to the body and use POST method")
 	urlCmd.PersistentFlags().StringSliceVarP(&parameters, "parameter", "p", []string{}, "add custom parameter(s)")
 	urlCmd.PersistentFlags().StringSliceVarP(&urls, "url", "u", []string{}, "URL(s) to scan")
-	urlCmd.PersistentFlags().StringSliceVar(&urlsReflection, "reflection", []string{}, "URL(s) to check for reflection")
 	urlCmd.PersistentFlags().IntVar(&lengthLimit, "lengthlimit", 0, "limit the polyglot length. 0 is unlimited (default 0)")
 
 	urlCmd.MarkPersistentFlagRequired("url")

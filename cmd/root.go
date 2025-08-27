@@ -91,6 +91,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&csti, "csti", false, "enable scanning for Client-Side Template Injections using a headless browser")
 	rootCmd.PersistentFlags().BoolVar(&escapeJSON, "escapereport", false, "escape HTML special chars in the JSON report")
 	rootCmd.PersistentFlags().StringSliceVar(&testheaders, "testheaders", []string{}, "headers to test. E.g. --testheaders Host,Origin,X-Forwarded-For")
+
+	urlCmd.PersistentFlags().StringSliceVar(&urlsReflection, "reflection", []string{}, "URL(s) to check for reflection")
 }
 
 func initConfig() {
