@@ -14,7 +14,7 @@ The `setHeader` function takes an `http.Request` object (`req`), a key string (`
 
 The `dialConnection` function takes a scheme string (`scheme`) and a host string (`host`) as input. It establishes a network connection using the appropriate protocol (HTTP or HTTPS) based on the scheme. It returns a `net.Conn` object representing the connection.
 
-The `doRequest` function takes an `http.Request` object (`req`) as input and performs an HTTP request using the provided request object. It handles scenarios where there are host header manipulations or the request needs to be sent through a proxy. It returns the response body, headers, status code, dump (string representation of the response), and any error that occurred during the request.
+The `doRequest` function takes an `http.Request` object (`req`) as input and performs an HTTP request using the provided request object. It handles scenarios where there are host header manipulations or the request needs to be sent through a proxy. The function automatically follows redirects (301, 302, 303, 307, 308) up to a maximum depth of 10 redirects, analyzing the final response after following redirects. It returns the response body, headers, status code, dump (string representation of the response), and any error that occurred during the request.
 
 Overall, the file contains functions for building requests, setting query parameters and headers, establishing network connections, and performing HTTP requests with various configurations.
 
@@ -147,8 +147,8 @@ func dialConnection(scheme, host string) (net.Conn, error) {
 	return net.Dial("tcp", host)
 }
 
-func doRequest(req *http.Request) (body string, headers http.Header, status int, dump string, err error) {
-	var resp *http.Response
+// doRequestInternal performs the actual HTTP request without following redirects
+func doRequestInternal(req *http.Request) (resp *http.Response, err error) {
 	var conn net.Conn
 
 	err = limiter.Wait(context.Background())
@@ -159,9 +159,38 @@ func doRequest(req *http.Request) (body string, headers http.Header, status int,
 
 	// if there are no host header manipulations, do a standard client.do
 	if req.Host == req.URL.Host || req.Host == req.URL.Hostname() {
+		// Create a client that doesn't automatically follow redirects
+		// but uses the same settings as the default client (cookie jar, timeout, etc.)
+		client := &http.Client{
+			Timeout:       time.Duration(config.Timeout) * time.Second,
+			Jar:            http.DefaultClient.Jar, // Use the same cookie jar
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				// Return an error to prevent automatic redirect following
+				return http.ErrUseLastResponse
+			},
+		}
+		// Copy transport settings from default transport
+		if defaultTransport, ok := http.DefaultTransport.(*http.Transport); ok {
+			transport := defaultTransport.Clone()
+			if transport.TLSClientConfig == nil {
+				transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+			} else {
+				transport.TLSClientConfig.InsecureSkipVerify = true
+			}
+			client.Transport = transport
+		} else {
+			// Fallback if DefaultTransport is not the expected type
+			client.Transport = http.DefaultTransport
+			if transport, ok := client.Transport.(*http.Transport); ok {
+				if transport.TLSClientConfig == nil {
+					transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+				} else {
+					transport.TLSClientConfig.InsecureSkipVerify = true
+				}
+			}
+		}
 		// Do Request
-		resp, err = http.DefaultClient.Do(req)
-
+		resp, err = client.Do(req)
 		if err != nil {
 			return
 		}
@@ -313,6 +342,89 @@ func doRequest(req *http.Request) (body string, headers http.Header, status int,
 		}
 	}
 
+	return resp, err
+}
+
+func doRequest(req *http.Request) (body string, headers http.Header, status int, dump string, err error) {
+	return doRequestWithRedirect(req, 0)
+}
+
+// doRequestWithRedirect performs the HTTP request and follows redirects up to maxRedirects times
+func doRequestWithRedirect(req *http.Request, redirectDepth int) (body string, headers http.Header, status int, dump string, err error) {
+	const maxRedirects = 10
+
+	// Perform the request
+	resp, err := doRequestInternal(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check if response is a redirect
+	redirectStatuses := []int{301, 302, 303, 307, 308}
+	isRedirect := false
+	for _, status := range redirectStatuses {
+		if resp.StatusCode == status {
+			isRedirect = true
+			break
+		}
+	}
+
+	// Follow redirect if applicable
+	if isRedirect && redirectDepth < maxRedirects {
+		// Get the Location header
+		location := resp.Header.Get("Location")
+		if location != "" {
+			// Parse the redirect URL
+			redirectURL, parseErr := url.Parse(location)
+			if parseErr != nil {
+				PrintVerbose("Error parsing redirect URL: "+parseErr.Error()+"\n", Yellow, 1)
+			} else {
+				// Resolve relative URLs
+				if !redirectURL.IsAbs() {
+					redirectURL = req.URL.ResolveReference(redirectURL)
+				}
+
+				PrintVerbose("Following redirect from "+req.URL.String()+" to "+redirectURL.String()+"\n", Cyan, 1)
+
+				// Create a new request to the redirect location
+				// Use GET for 301, 302, 303 redirects (per HTTP spec)
+				// Preserve method for 307, 308 redirects
+				method := req.Method
+				if resp.StatusCode == 301 || resp.StatusCode == 302 || resp.StatusCode == 303 {
+					method = "GET"
+				}
+
+				// Build new request
+				newReq, newReqErr := http.NewRequest(method, redirectURL.String(), nil)
+				if newReqErr != nil {
+					PrintVerbose("Error creating redirect request: "+newReqErr.Error()+"\n", Yellow, 1)
+				} else {
+					// Copy headers from original request (except Host)
+					for key, values := range req.Header {
+						if strings.EqualFold(key, "Host") {
+							continue
+						}
+						for _, value := range values {
+							newReq.Header.Add(key, value)
+						}
+					}
+
+					// Preserve Host header manipulation if present
+					if req.Host != req.URL.Host && req.Host != req.URL.Hostname() {
+						newReq.Host = req.Host
+					}
+
+					// Recursively follow the redirect
+					return doRequestWithRedirect(newReq, redirectDepth+1)
+				}
+			}
+		}
+	} else if isRedirect && redirectDepth >= maxRedirects {
+		PrintVerbose("Maximum redirect depth reached, stopping redirect following\n", Yellow, 1)
+	}
+
+	// Process the final response (or non-redirect response)
 	if boolReport {
 		var dumpBytes []byte
 		dumpBytes, err = httputil.DumpResponse(resp, true)
