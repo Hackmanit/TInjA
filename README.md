@@ -171,14 +171,14 @@ To scan HTTPS URLs using a proxy a CA certificate of the proxy in PEM format is 
 ## Background Information
 A blog post providing more information about template injection and [TInjA – the Template INJection Analyzer](https://github.com/Hackmanit/TInjA) can be found here:
 
-[Template Injection Vulnerabilities – Understand, Detect, Identify](https://hackmanit.de/en/blog-en/178-template-injection-vulnerabilities-understand-detect-identify)
+[Template Injection Vulnerabilities – Understand, Detect, Identify]([https://hackmanit.de/en/blog-en/178-template-injection-vulnerabilities-understand-detect-identify](https://web.archive.org/web/20251207144732/https://hackmanit.de/en/blog-en/178-template-injection-vulnerabilities-understand-detect-identify/))
 
 TInjA was developed as a part of a master's thesis by Maximilian Hildebrand.
 You can find results of the master's thesis publicly available here:
 - [Template Injection Table](https://github.com/Hackmanit/template-injection-table)
 - [Template Injection Playground](https://github.com/Hackmanit/template-injection-playground)
 - [TInjA – the Template INJection Analyzer](https://github.com/Hackmanit/TInjA)
-- [Master's Thesis (PDF)](https://www.hackmanit.de/images/download/thesis/Improving-the-Detection-and-Identification-of-Template-Engines-for-Large-Scale-Template-Injection-Scanning-Maximilian-Hildebrand-Master-Thesis-Hackmanit.pdf)
+- [Master's Thesis (PDF)](https://m10x.de/Master-Thesis.pdf)
 
 ## License
 TInjA – the Template INJection Analyzer was developed by [Hackmanit](https://hackmanit.de) and [Maximilian Hildebrand](https://www.github.com/m10x) as a part of his master's thesis. TInjA – the Template INJection Analyzer is licensed under the [Apache License, Version 2.0](license.txt).
